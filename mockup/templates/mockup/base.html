@@ -1,0 +1,53 @@
+{% load bootstrap4 %}
+{% load static %}
+
+<!doctype html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1,
+          shrink-to-fit=no">
+    <title>Steemit</title>
+
+    {% bootstrap_css %}
+    {% bootstrap_javascript jquery='full' %}
+
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
+
+        <a class="navbar-brand" href="{% url 'posts:index' %}">
+            <img class="img-fluid" src="{% static 'pizza-logo.jpg' %}" width="125" height="125">
+        </a>
+
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
+            aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'posts:posts' %}">Posts</a>
+                </li>
+            </ul>
+        </div>
+
+    </nav>
+
+    <main role="main" class="bg-light container">
+        <div class="pb-2 mb-2 border-bottom">
+            {% block page_header %}{% endblock page_header %}
+        </div>
+
+        <div class="bg-light">
+            {% block content %}{% endblock content %}
+        </div>
+    </main>
+
+</body>
+
+</html>

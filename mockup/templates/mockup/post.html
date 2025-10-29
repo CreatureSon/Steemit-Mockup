@@ -1,0 +1,61 @@
+{% extends "mockup/base.html" %}
+
+{% block page_header %}
+<h1>{{post}} Post</h1>
+{% endblock page_header %}
+
+{% block content %}
+<div class="container">
+    <!-- Row: Toppings and Image -->
+    <div class="row mb-4">
+        <!-- Toppings Column -->
+        <div class="col-md-8">
+            <div class="card-h-100">
+                <div class="card-header">
+                    <h4>Toppings</h4>
+                </div>
+                <div class="card body">
+                    <ul>
+                        {% for topping in toppings %}
+                        <li>{{ topping.topping_name }}</li>
+                        {% empty %}
+                        <p> There are no toppings for {{post}} Post yet. Odd..</p>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Column -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <img src="{{ post.post_image.url}}" class="img-fluid rounded" alt="{{ post.post_name }}">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="card mb-3">
+        <div class="card-header">
+            <h4>Comments</h4>
+        </div>
+        {% for comment in comments %}
+        <!-- Card header with timestamp -->
+        <h6 class="card-header">
+            Written by: {{ comment.user }} on {{ comment.date_added|date:'M d, Y H:i' }}
+        </h6>
+        <!-- Card body with comment text -->
+        <div class="card-body">{{ comment.text|linebreaks }}</div>
+        {% empty %} <!-- if the list is empty then display message-->
+        <div class="card-body">
+            <p>There are no comments for {{pizza}} Pizza yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <p><a href="{% url 'posts:new_comment' post.id %}">Add new comment</a></p>
+</div>
+
+{% endblock content %}

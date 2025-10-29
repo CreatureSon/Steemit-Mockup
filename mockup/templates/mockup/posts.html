@@ -1,0 +1,28 @@
+{% extends "mockup/base.html" %}
+
+{% block page_header %}
+   <h1>Posts</h1>
+{% endblock page_header %}
+
+{% block content %}
+
+  <p>Posts</p>
+
+  <!--In standard HTML, a bulleted list is called an unordered list 
+    and is indicated by the tags <ul></ul>. -->
+  <ul class="list-group border-bottom pb-2 mb-4">
+      <!-- for loop to loop through each post
+       NOTE: not like python, needs a endfor -->
+     {% for post in posts %}
+
+     <!-- To print a variable in a template, wrap the 
+        variable name in double braces. -->
+      <li class="list-group-item border-0">
+        <a href="{% url 'posts:post' post.id %}">{{post}}</a>
+      </li>
+     {% empty %}  <!-- if the list is empty then display message-->
+       <li class="list-group-item border-0">No posts have been added yet.</li>
+     {% endfor %}
+  </ul>
+
+{% endblock content %}
