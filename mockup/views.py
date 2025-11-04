@@ -21,15 +21,13 @@ def posts(request):
 @login_required
 def post(request, post_id):
     post = Post.objects.get(id=post_id)
-
     comments = Comment.objects.filter(post=post)
 
     context = {
         'post': post, 
         'comments': comments,
         'icons': comments, #ICONS
-        'participant': post #participant
-        #'showCommentSeparator': comment.length
+        'participant': post, #participant
         }
 
     return render(request, "mockup/post.html", context)
@@ -44,6 +42,7 @@ def new_comment(request, post_id):
         form = CommentForm(data=request.POST)
         if form.is_valid():
             new_comment = form.save(commit=False)
+            new_comment.user = request.user
             new_comment.post = post
             new_comment.save()
             return redirect('posts:post', post_id=post_id)

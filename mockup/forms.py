@@ -5,7 +5,7 @@ from .models import *
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['user','text']
+        fields = ['text']
         labels = {
             'user':'Name:',
             'text':''

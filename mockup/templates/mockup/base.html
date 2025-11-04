@@ -13,6 +13,9 @@
 
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
+    {% block styles %}
+        <link rel="stylesheet" href="{% static 'mockup/style.css' %}">
+    {% endblock styles %}
 
 </head>
 

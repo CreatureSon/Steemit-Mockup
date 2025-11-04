@@ -1,0 +1,66 @@
+{% load static %}
+<div>
+    <div style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding-top:8px; padding-bottom:8px;">
+        <div style="display:flex; flex-direction:row; align-items:center; font-size:12px; color:#888;">
+            <img src="{% if downvoted %} {% static 'post/DownVoteClicked.png' %} {% else %} {% static 'post/DownVote.png' %} {% endif %}" 
+                class="static-button" 
+                data-action="vote"
+                unicorn:click="downvote" 
+                data-vote="downvote"/>
+            <img src="{% if upvoted %} {% static 'post/UpVoteClicked.png' %} {% else %} {% static 'post/UpVote.png' %} {% endif %}" 
+                class="static-button" 
+                data-action="vote"
+                unicorn:click="upvote"
+                data-vote="upvote"/>
+            <span style="margin-left:5px; margin-right:5px; color:#1FBF82">{{tokens}}</span>
+            <span style="width:1px; height:16px; background-color:#ccc;"></span>
+            <span style="margin-left:5px; color:#1FBF82">{{post.votes}} votes</span>
+        </div>
+
+        <div style="display:flex; flex-direction:row; align-items:center; justify-content:flex-end; gap:5px; font-size:12px; color:#888">
+            <img src="{% if resteemed %} {% static 'post/ResteemClicked.png' %} {% else %} {% static 'post/Resteem.png' %} {% endif %}"
+                class="static-button" 
+                style="margin-right:4px;"
+                data-action="share"
+                unicorn:click="toggle_resteem"
+                alt="ReSteemit Post" />
+            <span style="width:1px; height:16px; background-color:#ccc;"></span>
+            <a href="{% url 'posts:new_comment' post.id %}">
+                <div style="cursor:pointer; color:#1FBF82; text-align:center" class="action-button"
+                    data-action="comment">
+                    Reply
+                </div>
+            </a>
+            <span style="width:1px; height:16px; background-color:#ccc;"></span>
+            <img src="{% static 'post/Comments.png' %}" style="width:16px; height:16px; mix-blend-mode:multiply;" />
+            <span style="color:#1FBF82; display:flex; align-items:center; gap:8px; margin-right:4px;">{{post.comments.count}}</span>
+        </div>
+    </div>
+
+    <hr>
+
+    {% if show_comment_box %}
+    <div style="margin-top:5px; width:calc(100% - 24px); border:1px solid #ddd; background-color:white; z-index:10; border-radius:12px; padding:8px;"
+        class="action-box" data-action="comment">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
+            <div style="color:#888; font-size:12px; width:100%;">Write a comment</div>
+            <textarea class="comment-box" style="font-size:14px; padding:8px; border-radius:8px; width:100%;"
+                rows="6"></textarea>
+            <div
+                style="width:100%; display:flex; flex-direction:row; align-items:center; justify-content:flex-end; gap:5px;">
+                <div style="color:#888; cursor:pointer;" class="comment-submit"><span
+                        class="far fa-paper-plane-top"></span></div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if show_resteem_box %}
+    <div style="margin-top:5px; width:calc(100% - 24px); border:1px solid #ddd; background-color:white; z-index:10; border-radius:12px; padding:8px;">
+        <div style="width:100%; text-align:center; font-size:14px; font-weight:bold; color:#888; cursor:pointer;"
+            class="share-submit" unicorn:click="resteemed_post">
+            <span class="fa fa-share" style="margin-right:4px;"></span>Repost to my timeline
+        </div>
+    </div>
+    {% endif %}
+</div>

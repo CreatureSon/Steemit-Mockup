@@ -8,11 +8,10 @@ class Post(models.Model):
     image = models.ImageField(upload_to='images/')
     date = models.DateTimeField(auto_now_add=True)
     votes = models.IntegerField(default=0)
-    commentCount = models.IntegerField(default=0)
-    tokens = models.FloatField(default=0.0)
+    tokens = models.CharField(max_length=30, default="0.00")
 
     def save(self, *args, **kwargs):
-        self.tokens = self.votes * 0.4
+        self.tokens = f"${self.votes * 0.4:,.2f}"
         super().save(*args, **kwargs)
 
     #//TODO
@@ -29,7 +28,7 @@ class Post(models.Model):
         return self.title
     
 class Comment(models.Model):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     date = models.DateTimeField(auto_now_add=True)

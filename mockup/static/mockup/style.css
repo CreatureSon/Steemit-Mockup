@@ -1,0 +1,9 @@
+.static-button {
+    background-color: transparent;
+    border: none;
+    padding: 1px;
+    margin: 0;
+    width: 24px; 
+    height: 24px; 
+    cursor: pointer;
+}

@@ -1,6 +1,13 @@
 {% extends "mockup/base.html" %}
+{% load static %}
+
+{% load unicorn %}
 
 {% block content %}
+{% unicorn_scripts %}
+
+{% csrf_token %}
+
 <div style="position:relative; padding:4px; border:1px solid #ddd; border-radius:8px; height:100%;">
     <div style="padding:8px; max-height:100%; overflow-y:scroll;" class="scroll-frame">
         <div style="width:100%; display:flex; flex-direction:row; align-items:center; gap:8px; margin-bottom:8px;">
@@ -23,78 +30,21 @@
         <img src="{{post.image.url}}" style="display:block; max-width:100%; border-radius:8px;" />
         {% endif %}
         {% if post.context %}
-        <div style="background-color:#e8e8e8; margin-top:8px; padding:8px; border-radius:5px; font-size:14px; color:#555;">
-        {{post.context}}
+        <div
+            style="background-color:#e8e8e8; margin-top:8px; padding:8px; border-radius:5px; font-size:14px; color:#555;">
+            {{post.context}}
         </div>
         {% endif %}
-        <div style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding-top:8px; padding-bottom:8px;">
-            <div style="display:flex; flex-direction:row; align-items:center; font-size:12px; color:#888;">
-                <img src="{% if participantUpVoted %} {{icons.upvote_CLICKED}} {% else %} {{icons.upvote}} {% endif %}"
-                    style="width:24px; height:24px; cursor:pointer;" 
-                    class="vote-button" 
-                    data-action="vote"
-                    data-vote="upvote"
-                />
-                <img src="{% if participantDownVoted %} {{icons.downvote_CLICKED}} {% else %} {{icons.downvote}} {% endif %}"
-                    style="width:24px; height:24px; cursor:pointer;" 
-                    class="vote-button" 
-                    data-action="vote"
-                    data-vote="downvote"
-                />
-                <span style="margin-left:5px; margin-right:5px; color:#1FBF82">{{post.tokenValue}}</span>
-                <span style="width:1px; height:16px; background-color:#ccc;"></span>
-                {% if post.votes %}
-                    <span style="margin-left:5px; color:#1FBF82">{{post.votes}} votes</span>                            
-                {% endif %}
-            </div>
-            <div style="display:flex; flex-direction:row; align-items:center; justify-content:flex-end; gap:5px; font-size:12px; color:#888">
-                <img src="{% if participantShare %} {{icons.resteem_CLICKED}} {% else %} {{icons.resteem}} {% endif %}" 
-                    style="margin-right:4px; cursor:pointer; text-align:center;"
-                    class="action-button"
-                    data-action="share"
-                />
-                <span style="width:1px; height:16px; background-color:#ccc;"></span>
-                <div style="cursor:pointer; color:#1FBF82; text-align:center" 
-                    class="action-button" 
-                    data-action="comment">
-                        Reply
-                </div>
-                <span style="width:1px; height:16px; background-color:#ccc;"></span>
-                {% if post.commentCount %}
-                    <span {% if participantComment %}style="font-weight:bold"{% endif %}><span class="far fa-comments" style="margin-right:4px;"></span>{{post.commentCount}}</span>
-                {% endif %}
-            </div>
-        </div>
-        {% if showSeparator %}
-        <hr/>
-        {% endif %}
-        <div style="margin-top:5px; width:calc(100% - 24px); border:1px solid #ddd; background-color:white; z-index:10; border-radius:12px; padding:8px; display:none;" class="action-box" data-action="comment">
-            <div style="display:flex; flex-direction:column; align-items:center; gap:5px;">
-                <div style="color:#888; font-size:12px; width:100%;">Write a comment</div>
-                <textarea class="comment-box" style="font-size:14px; padding:8px; border-radius:8px; width:100%;" rows="6"></textarea>
-                <div style="width:100%; display:flex; flex-direction:row; align-items:center; justify-content:flex-end; gap:5px;">
-                    <div style="color:#888; cursor:pointer;" class="comment-submit"><span class="far fa-paper-plane-top"></span></div>
-                </div>
-            </div>
-        </div>
-        <div style="margin-top:5px; width:calc(100% - 24px); border:1px solid #ddd; background-color:white; z-index:10; border-radius:12px; padding:8px; display:none;" class="action-box" data-action="share">
-            <div style="width:100%; text-align:center; font-size:14px; font-weight:bold; color:#888; cursor:pointer;" class="share-submit">
-                <span class="fa fa-share" style="margin-right:4px;"></span>Repost to my timeline
-            </div>
-        </div>
-        {% if showCommentSeparator %}
-        <hr/>
-        {% endif %}
+        {% unicorn 'post_responses' post_id=post.id %}
         <div style="display:flex; flex-direction:column; gap:5px; padding-top:8px;">
-        {% for comment in comments %}
-        <div style="background-color:#499bc4; color:white; padding:8px; border-radius:8px;">
-            <div style="font-size:12px; font-weight:bold">{{comment.user}}<span class="fas fa-comment" style="margin-left:4px;"></span></div>
-            <div style="font-size:14px;">{{comment.text|linebreaks}}</div>
+            {% for comment in comments %}
+            <div style="background-color:#499bc4; color:white; padding:8px; border-radius:8px;">
+                <div style="font-size:12px; font-weight:bold">{{comment.user}}<span class="fas fa-comment"
+                        style="margin-left:4px;"></span></div>
+                <div style="font-size:14px;">{{comment.text|linebreaks}}</div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-        </div>
-
-        <p><a href="{% url 'posts:new_comment' post.id %}">Add new comment</a></p>
     </div>
 </div>
 

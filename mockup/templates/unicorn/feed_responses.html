@@ -1,0 +1,42 @@
+{% load static %}
+<div>
+    <div style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding-top:8px;">
+        <div style="display:flex; flex-direction:row; align-items:center; font-size:12px; color:#888; gap:4px;">
+            <img src="{% if downvoted %} {% static 'post/DownVoteClicked.png' %} {% else %} {% static 'post/DownVote.png' %} {% endif %}" 
+                class="static-button" style="mix-blend-mode:multiply;"
+                data-action="vote" 
+                data-vote="downvote"
+                unicorn:click="downvote"/>
+            <img src="{% if upvoted %} {% static 'post/UpVoteClicked.png' %} {% else %} {% static 'post/UpVote.png' %} {% endif %}" 
+                class="static-button" style="mix-blend-mode:multiply;"
+                data-action="vote" 
+                data-vote="upvote"
+                unicorn:click="upvote"/>
+            <span style="margin-left:5px; color:#1FBF82">{{tokens}}</span>
+
+            <span style="width:1px; height:16px; background-color:#ccc;"></span>
+            <span style="color:#1FBF82">{{post.votes}} votes</span>
+
+            <span style="width:1px; height:16px; background-color:#ccc;"></span>
+            <img src="{% static 'post/Comments.png' %}" style="width:16px; height:16px; mix-blend-mode:multiply;"/>
+            <span style="color:#1FBF82; display:flex; align-items:center; gap:8px; margin-right:4px;">{{post.comments.count}}</span>
+
+            <span style="width:1px; height:16px; background-color:#ccc;"></span>
+            <img src="{% if resteemed %} {% static 'post/ResteemClicked.png' %} {% else %} {% static 'post/Resteem.png' %} {% endif %}"
+                class="static-button" style="mix-blend-mode:multiply; margin-right:4px;"
+                data-action="share" alt="ReSteemit Post"
+                unicorn:click="toggle_resteem"/>
+        </div>
+    </div>
+
+    <hr>
+        
+    {% if show_resteem_box %}
+    <div style="margin-top:5px; width:calc(100% - 24px); border:1px solid #ddd; background-color:white; z-index:10; border-radius:12px; padding:8px;">
+        <div style="width:100%; text-align:center; font-size:14px; font-weight:bold; color:#888; cursor:pointer;"
+            class="share-submit" unicorn:click="resteemed_post">
+            <span class="fa fa-share" style="margin-right:4px;"></span>Repost to my timeline
+        </div>
+    </div>
+    {% endif %}
+</div>
