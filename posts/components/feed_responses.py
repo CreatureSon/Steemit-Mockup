@@ -1,7 +1,7 @@
 from django_unicorn.components import UnicornView
-from mockup.models import Post
+from posts.models import Post
 
-class PostResponsesView(UnicornView):
+class FeedResponsesView(UnicornView):
     post: Post
     tokens: str
     downvoted: bool = False
@@ -13,7 +13,6 @@ class PostResponsesView(UnicornView):
 
     def mount(self):
         #arg = self.component_args[0]
-        
         post_id = self.component_kwargs["post_id"]
 
         self.post = Post.objects.get(id=post_id)

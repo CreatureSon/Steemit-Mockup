@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class MockupConfig(AppConfig):
+class PostsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'mockup'
+    name = 'posts'

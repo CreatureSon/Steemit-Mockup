@@ -4,7 +4,7 @@ from .models import *
 from .forms import *
 
 def index(request):
-    return render(request, 'mockup/index.html')
+    return render(request, 'posts/index.html')
 
 @login_required
 def posts(request):
@@ -16,7 +16,7 @@ def posts(request):
         'participant': posts #participant
         }
 
-    return render(request, "mockup/posts.html", context)
+    return render(request, "posts/posts.html", context)
 
 @login_required
 def post(request, post_id):
@@ -30,7 +30,7 @@ def post(request, post_id):
         'participant': post, #participant
         }
 
-    return render(request, "mockup/post.html", context)
+    return render(request, "posts/post.html", context)
 
 @login_required
 def new_comment(request, post_id):
@@ -49,4 +49,20 @@ def new_comment(request, post_id):
 
     context = {'form': form, 'post': post}
 
-    return render(request, "mockup/new_comment.html", context)
+    return render(request, "posts/new_comment.html", context)
+
+@login_required
+def new_post(request):
+    if request.method != 'POST':
+        form = PostForm()
+    else:
+        form = PostForm(data=request.POST)
+        if form.is_valid():
+            new_post = form.save(commit=False)
+            new_post.user = request.user
+            new_post.save()
+            return redirect('posts:posts')
+
+    context = {'form': form}
+
+    return render(request, "posts/new_post.html", context)

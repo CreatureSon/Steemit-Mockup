@@ -14,7 +14,7 @@
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
     {% block styles %}
-        <link rel="stylesheet" href="{% static 'mockup/style.css' %}">
+        <link rel="stylesheet" href="{% static 'posts/style.css' %}">
     {% endblock styles %}
 
 </head>
@@ -36,8 +36,19 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'posts:posts' %}">Posts</a>
                 </li>
+                <li class="nav-item">
+                {% if user.is_authenticated %}
+                    <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="nav-link btn btn-link p-0 m-0 align-baseline">LogOut</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">LogIn</a>
+                {% endif %}
             </ul>
         </div>
+
+        
 
     </nav>
 

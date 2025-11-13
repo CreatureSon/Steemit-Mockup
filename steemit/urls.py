@@ -21,8 +21,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('mockup.urls')),
+    path('', include('posts.urls')),
     path('unicorn/', include('django_unicorn.urls')),
+    path('accounts/', include('django.contrib.auth.urls'))
 ]
 
 if settings.DEBUG: # Might remove this later
