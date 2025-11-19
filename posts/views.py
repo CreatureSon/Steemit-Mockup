@@ -8,26 +8,35 @@ def index(request):
 
 @login_required
 def posts(request):
-    posts = Post.objects.all()
+    participant = request.user
+
+    if participant.is_npc | participant.is_staff:
+        posts = Post.objects.all()
+    else:
+        posts = Post.objects.filter(user__is_npc=True) | Post.objects.filter(user=participant)
 
     context = {
         'posts': posts,
-        'icons': posts, #ICONS
-        'participant': posts #participant
+        'participant': participant
         }
 
     return render(request, "posts/posts.html", context)
 
 @login_required
 def post(request, post_id):
+    participant = request.user
     post = Post.objects.get(id=post_id)
-    comments = Comment.objects.filter(post=post)
+
+    if participant.is_npc | participant.is_staff:
+        comments = Comment.objects.filter(post=post)
+    else:
+        comments = Comment.objects.filter(post=post, user__is_npc=True) | Comment.objects.filter(post=post, user=participant)
+
 
     context = {
         'post': post, 
         'comments': comments,
-        'icons': comments, #ICONS
-        'participant': post, #participant
+        'participatnt': request.user
         }
 
     return render(request, "posts/post.html", context)

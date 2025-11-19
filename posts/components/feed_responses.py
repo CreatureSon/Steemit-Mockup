@@ -1,5 +1,5 @@
 from django_unicorn.components import UnicornView
-from posts.models import Post, Vote
+from posts.models import Post, Vote, Comment
 
 class FeedResponsesView(UnicornView):
     post: Post
@@ -11,6 +11,7 @@ class FeedResponsesView(UnicornView):
     show_resteem_box: bool = False
     show_comment_box: bool = False
     total_votes: int = 0
+    total_comments: int = 0
 
     def mount(self):
         #arg = self.component_args[0]
@@ -29,6 +30,7 @@ class FeedResponsesView(UnicornView):
         self.tokens = self.post.tokens
         self.voted = self.upvoted or self.downvoted
         self.total_votes = self.calc_votes()
+        self.total_comments = self.calc_comments(user)
         #assert self.name == "jimmy"
 
     def upvote(self):
@@ -63,7 +65,15 @@ class FeedResponsesView(UnicornView):
 
     def calc_votes(self):
         user_voted = 1 if Vote.objects.filter(user=self.request.user, post=self.post).exists() else 0
-        return self.post.votes + user_voted  
+        return self.post.votes + user_voted
+    
+    def calc_comments(self, user):
+        npc_count = Comment.objects.filter(post=self.post, user__is_npc=True).count()
+        if user.is_authenticated:
+            participant_count = Comment.objects.filter(post=self.post, user=user).count()
+            return npc_count + participant_count
+        else:
+            return npc_count
 
     def toggle_resteem(self):
         if not self.resteemed:

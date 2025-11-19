@@ -54,9 +54,12 @@ def participant_login(request):
             try:
                 user = Participant.objects.get(participant_code=participant_code)
 
-                if user.is_npc:
-                    error = "Cannot login to this account."
-                elif user.is_superuser:
+                #TODO
+                # Add these lines before releasing so no one can login as NPCs
+                # Will also just be removing the whole logic to login in the end.
+                #if user.is_npc:
+                #    error = "Cannot login to this account."
+                if user.is_superuser:
                     # Must authenticate with password
                     user_auth = authenticate(
                         request, participant_code=participant_code, password=password

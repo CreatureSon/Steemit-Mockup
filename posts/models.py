@@ -6,7 +6,7 @@ class Post(models.Model):
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
         related_name="posts", 
-        default=1
+        default=2
     )
     title = models.CharField(max_length=75)
     text = models.CharField(max_length=200)
