@@ -8,6 +8,7 @@ __pycache__/
 
 # Random
 RecordingTemplate.*
+~$RecordingTemplate.*
 
 # Distribution / packaging
 .Python

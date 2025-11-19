@@ -21,8 +21,8 @@
           {% if post.user.image %}
           <img src="{{post.user.image.url}}" style="width:16px; height:16px; display:block; border-radius:50%;" />
           {% endif %}
-          {% if post.user.username %}
-          <span style="font-weight:bold; font-size:14px;">{{post.user.username}}</span>
+          {% if post.user.participant_code %}
+          <span style="font-weight:bold; font-size:14px;">{{post.user.participant_code}}</span>
           <span style="color:#888; font-size:12px;">{{post.date}}</span>
           {% endif %}
         </div>

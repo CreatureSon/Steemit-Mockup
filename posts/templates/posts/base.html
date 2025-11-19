@@ -14,7 +14,7 @@
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
     {% block styles %}
-        <link rel="stylesheet" href="{% static 'posts/style.css' %}">
+    <link rel="stylesheet" href="{% static 'posts/style.css' %}">
     {% endblock styles %}
 
 </head>
@@ -23,7 +23,7 @@
     <nav class="navbar navbar-expand-md navbar-light bg-light mb-4 border">
 
         <a class="navbar-brand" href="{% url 'posts:index' %}">
-            <img class="img-fluid" src="{% static 'pizza-logo.jpg' %}" width="125" height="125">
+            <img class="img-fluid" src="{% static 'home/pizza-logo.jpg' %}" width="125" height="125">
         </a>
 
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse"
@@ -37,19 +37,23 @@
                     <a class="nav-link" href="{% url 'posts:posts' %}">Posts</a>
                 </li>
                 <li class="nav-item">
-                {% if user.is_authenticated %}
-                    <form action="{% url 'logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="nav-link btn btn-link p-0 m-0 align-baseline">LogOut</button>
+                    <a class="nav-link" href="{% url 'posts:new_post' %}">Create Post</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    {% if user.is_authenticated %}
+                    <form action="{% url 'participants:end' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="nav-link btn btn-link p-0 m-0 align-baseline">Exit</button>
                     </form>
-                {% else %}
-                    <a href="{% url 'login' %}">LogIn</a>
-                {% endif %}
+                    {% else %}
+                    <a class="nav-link" href="{% url 'participants:login' %}">Begin</a>
+                    {% endif %}
+                </li>
             </ul>
         </div>
-
-        
-
     </nav>
 
     <main role="main" class="bg-light container">

@@ -29,9 +29,9 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'posts',
+    'participants',
     'bootstrap4',
     'django_unicorn',
     'django.contrib.admin',
@@ -101,6 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'participants.Participant'
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
@@ -129,3 +130,5 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Login settings
 LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/participants/login/'
+LOGOUT_URL = '/participants/end/'

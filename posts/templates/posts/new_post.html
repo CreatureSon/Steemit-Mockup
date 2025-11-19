@@ -2,6 +2,8 @@
 
 {% block content %}
 
+<p><strong>User:</strong> {{ request.user.participant_code }}</p>
+
 <p>Create a New Post</p>
 
 <form action="{% url 'posts:new_post' %}" method="post">
@@ -10,7 +12,7 @@
 
 {{form.as_p}}
 
-<button name="submit">Add Comment</button>
+<button name="submit">Publish Post</button>
 
 </form>
 
