@@ -1,0 +1,18 @@
+{% extends "participants/base.html" %}
+{% load static %}
+
+{% block page_header %}
+<div class="jumbotron">
+    <h1 class="display-3">This is your wallet</h1>
+    <p class="lead" style="font-weight:bold;">{{user.steem_power}} Steem Power</p>
+    <p class="lead" style="font-weight:bold">{{user.steem_dollars}} Steem Dollars</p>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <p>Baylor</p>
+        </div>
+    </div>
+</div>
+{% endblock page_header %}

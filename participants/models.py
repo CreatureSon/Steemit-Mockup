@@ -7,8 +7,8 @@ class Participant(AbstractBaseUser, PermissionsMixin):
     participant_code = models.CharField(max_length=30, unique=True)
     
     # Participant Steemit Balances
-    steemit_dollars = models.DecimalField(max_digits=20, decimal_places=3, default=0)
-    steemit_power = models.DecimalField(max_digits=20, decimal_places=3, default=0)
+    steem_dollars = models.DecimalField(max_digits=20, decimal_places=3, default=0)
+    steem_power = models.DecimalField(max_digits=20, decimal_places=3, default=0)
     
     # NPC Account Flag
     is_npc = models.BooleanField(default=True)

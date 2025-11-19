@@ -7,8 +7,10 @@ __pycache__/
 *.so
 
 # Random
-RecordingTemplate.*
-~$RecordingTemplate.*
+Participant_Data.*
+~$Participant_Data.*
+ToDoList.*
+~$ToDoList.*
 
 # Distribution / packaging
 .Python
