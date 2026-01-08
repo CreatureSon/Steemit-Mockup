@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block page_header %}
+<h1>{{user.participant_code}}</h1>
+
 <div class="jumbotron">
     <h1 class="display-3">This is your wallet</h1>
     <p class="lead" style="font-weight:bold;">{{user.steem_power}} Steem Power</p>
