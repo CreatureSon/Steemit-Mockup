@@ -2,22 +2,33 @@ from django.db import models
 from django.conf import settings
 
 class Post(models.Model):
+    # Local Participant Field
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE, 
         related_name="posts", 
-        default=2
+        null=True,
+        blank=True
     )
-    title = models.CharField(max_length=75)
-    text = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='images/')
-    date = models.DateTimeField(auto_now_add=True)
+
+    # Post Association Fields
+    author = models.CharField(max_length=75)
+    permlink = models.CharField(max_length=255, blank=True, null=True)
+
+    # Post Data Fields
+    title = models.CharField(max_length=150)
+    text = models.TextField(max_length=50000)
+    image_url = models.URLField(blank=True, null=True)
+    date = models.DateTimeField()
     votes = models.IntegerField(default=0)
-    tokens = models.CharField(max_length=30, default="0.00")
+    payout = models.CharField(max_length=30, default="0.00")
 
     def save(self, *args, **kwargs):
-        self.tokens = f"${self.votes * 0.4:,.2f}"
+        self.payout = f"${self.votes * 0.4:,.2f}"
         super().save(*args, **kwargs)
+
+    class Meta:
+        unique_together = ('author', 'permlink')
 
     #//TODO
     # Future method for tokens possibly

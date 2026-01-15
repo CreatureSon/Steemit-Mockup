@@ -3,7 +3,7 @@ from posts.models import Post, Vote
 
 class PostResponsesView(UnicornView):
     post: Post
-    tokens: str
+    payout: str
     downvoted: bool = False
     upvoted: bool = False
     voted: bool = False
@@ -19,15 +19,15 @@ class PostResponsesView(UnicornView):
         self.post = Post.objects.get(id=post_id)
 
         user = self.request.user
-        if user.is_authenticated:
+        if user is not None and user.is_authenticated:
             voted = Vote.objects.filter(user=user, post=self.post).first()
 
             if voted:
                 self.upvoted = voted.value == Vote.UPVOTE
                 self.downvoted = voted.value == Vote.DOWNVOTE
 
-        self.name = self.post.user.participant_code
-        self.tokens = self.post.tokens
+        self.name = self.post.author
+        self.payout = self.post.payout
         self.voted = self.upvoted or self.downvoted
         self.total_votes = self.calc_votes()
 

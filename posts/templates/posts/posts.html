@@ -2,14 +2,10 @@
 {% load static %}
 {% load unicorn %}
 
-{% block page_header %}
-<b>Posts</b>
-{% endblock page_header %}
-
 {% block content %}
 {% unicorn_scripts %}
 {% csrf_token %}
-<div style="position:relative; padding:4px; border:1px solid #ddd; border-radius:8px; height:400px;">
+<div style="position:relative; padding:4px; border:1px solid #ddd; border-radius:8px; height:600px;">
   <div style="position:absolute; top:0; left:0; right:0; bottom:0; padding:8px; overflow-y:scroll;"
     class="scroll-frame">
     {% for post in posts %}
@@ -21,16 +17,16 @@
           {% if post.user.image %}
           <img src="{{post.user.image.url}}" style="width:16px; height:16px; display:block; border-radius:50%;" />
           {% endif %}
-          {% if post.user.participant_code %}
-          <span style="font-weight:bold; font-size:14px;">{{post.user.participant_code}}</span>
+          {% if post.author %}
+          <span style="font-weight:bold; font-size:14px;">{{post.author}}</span>
           <span style="color:#888; font-size:12px;">{{post.date}}</span>
           {% endif %}
         </div>
       </div>
       <div style="display:flex; flex-direction:row; align-items:flex-start; gap:12px; width:100%">
         <a href="{% url 'posts:post' post.id %}" style="text-decoration:none; color:inherit;">
-          {% if post.image %}
-          <img src="{{post.image.url}}" style="width: 128px; height:95px; border-radius:8px;" />
+          {% if post.image_url %}
+          <img src="{{post.image_url}}" style="width: 128px; height:95px; border-radius:8px;" />
           {% endif %}
           <div style="flex:1 1 0; min-width:0; max-width:100%; display:flex; flex-direction:column;">
             <div style="font-size:14px; font-weight:bold; color:#333333; margin-bottom:1px;">{{post.title}}</div>
@@ -38,7 +34,7 @@
             <div style="font-size:12px; margin-bottom:4px; 
                               overflow:hidden; text-overflow:ellipsis;
                               white-space:nowrap; width:100%;">
-              {{post.text|linebreaks}}
+              {{post.text|safe}}
             </div>
             {% endif %}
           </a>
