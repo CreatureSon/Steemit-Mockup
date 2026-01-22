@@ -5,24 +5,24 @@ from .models import *
 class CommentForm(forms.ModelForm):
     class Meta:
         model = Comment
-        fields = ['text']
+        fields = ['body']
         labels = {
             'user':'Name:',
-            'text':''
+            'body':''
             }
 
-        widgets = {'text':forms.Textarea(attrs={'cols':80})}
+        widgets = {'body':forms.Textarea(attrs={'cols':80})}
 
 class PostForm(forms.ModelForm):
     class Meta:
         model = Post
-        fields = ['title', 'text']
+        fields = ['title', 'body']
         labels = {
             'title':'Title:',
-            'text':'Description:'
+            'body':'Description:'
             }
 
         widgets = {
             'title':forms.TextInput(attrs={'size':80}),
-            'text':forms.Textarea(attrs={'cols':80, 'rows':4}),
+            'body':forms.Textarea(attrs={'cols':80, 'rows':4}),
             }

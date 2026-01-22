@@ -9,9 +9,6 @@ class Participant(AbstractBaseUser, PermissionsMixin):
     # Participant Steemit Balances
     steem_dollars = models.DecimalField(max_digits=20, decimal_places=3, default=0)
     steem_power = models.DecimalField(max_digits=20, decimal_places=3, default=0)
-    
-    # NPC Account Flag
-    is_npc = models.BooleanField(default=True)
 
     # Required Fields
     is_active = models.BooleanField(default=True)

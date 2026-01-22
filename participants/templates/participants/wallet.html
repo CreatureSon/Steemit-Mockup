@@ -2,19 +2,85 @@
 {% load static %}
 
 {% block page_header %}
-<h1>{{user.participant_code}}</h1>
+<!-- Top user info box -->
+<div class="wallet-user-box">
+    <div class="wallet-user-inner">
+        <h1 class="wallet-username">{{ user.participant_code }}</h1>
+        <p class="wallet-join-date">Joined January 2026</p>
+    </div>
 
-<div class="jumbotron">
-    <h1 class="display-3">This is your wallet</h1>
-    <p class="lead" style="font-weight:bold;">{{user.steem_power}} Steem Power</p>
-    <p class="lead" style="font-weight:bold">{{user.steem_dollars}} Steem Dollars</p>
-</div>
+    <!-- Sub-navigation bar -->
+    <div class="wallet-subnav">
+        <div class="wallet-subnav-inner">
+            <div class="wallet-subnav-left">
+                <a href="#" class="wallet-tab">Blog</a>
+                <a href="#" class="wallet-tab">Rewards ▾</a>
+            </div>
 
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <p>Baylor</p>
+            <div class="wallet-subnav-right">
+                <span class="wallet-tab active">Wallet</span>
+            </div>
         </div>
     </div>
+
 </div>
 {% endblock page_header %}
+
+{% block content %}
+<div class="wallet">
+    <!-- STEEM -->
+    <div class="wallet-section">
+        <div class="wallet-columns">
+            <div class="wallet-col wallet-info">
+                <div class="wallet-header">STEEM</div>
+                <p class="wallet-description">
+                    Tradeable tokens that may be transferred anywhere at anytime.
+                    Steem can be converted to STEEM POWER in a process called powering up.
+                </p>
+            </div>
+            <div class="wallet-col wallet-balance-col">
+                <div class="wallet-balance-box">
+                    <div class="wallet-balance">{{ user.steem_dollars }} STEEM</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEEM POWER -->
+    <div class="wallet-section highlighted">
+        <div class="wallet-columns">
+            <div class="wallet-col wallet-info">
+                <div class="wallet-header">STEEM POWER</div>
+                <p class="wallet-description">
+                    Influence tokens which give you more control over post payouts and allow you to earn on curation rewards.
+                    Part of your STEEM POWER may be delegated. Delegation is donated for influence or to help new users perform actions.
+                </p>
+            </div>
+            <div class="wallet-col wallet-balance-col">
+                <div class="wallet-balance-box">
+                    <div class="wallet-balance">{{ user.steem_power }} SP</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STEEM DOLLARS -->
+    <div class="wallet-section">
+        <div class="wallet-columns">
+            <div class="wallet-col wallet-info">
+                <div class="wallet-header">STEEM DOLLARS</div>
+                <p class="wallet-description">
+                    Tradeable tokens that may be transferred anywhere at anytime.
+                    SBD can be converted to STEEM over 3.5 days.
+                </p>
+            </div>
+            <div class="wallet-col wallet-balance-col">
+                <div class="wallet-balance-box">
+                    <div class="wallet-balance">${{ user.steem_dollars }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock content %}

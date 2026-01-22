@@ -17,14 +17,13 @@ def begin(request):
         if consent_given:
             # Generate unique participant code
             prefix = 'Participant_'
-            existing_participants = Participant.objects.filter(is_npc=False).count()
+            existing_participants = Participant.objects.count()
             participant_code = f"{prefix}{existing_participants + 1:03d}"
 
             # Create new participant
             participant = Participant.objects.create_user(
                 participant_code=participant_code,
                 password=None,
-                is_npc=False,
                 is_staff=False,
                 is_active=True,
                 steem_power=100.00,
@@ -64,11 +63,6 @@ def participant_login(request):
             try:
                 user = Participant.objects.get(participant_code=participant_code)
 
-                #TODO
-                # Add these lines before releasing so no one can login as NPCs
-                # Will also just be removing the whole logic to login in the end.
-                #if user.is_npc:
-                #    error = "Cannot login to this account."
                 if user.is_superuser:
                     # Must authenticate with password
                     user_auth = authenticate(

@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.utils.text import slugify
+from bs4 import BeautifulSoup
 from .models import *
 from .forms import *
 
@@ -10,10 +12,10 @@ def index(request):
 def posts(request):
     participant = request.user
 
-    if participant.is_npc | participant.is_staff:
+    if participant.is_staff:
         posts = Post.objects.all()
     else:
-        posts = Post.objects.filter(user__is_npc=True) | Post.objects.filter(user=participant)
+        posts = Post.objects.filter(user=None) | Post.objects.filter(user=participant)
 
     context = {
         'posts': posts,
@@ -27,10 +29,10 @@ def post(request, post_id):
     participant = request.user
     post = Post.objects.get(id=post_id)
 
-    if participant.is_npc | participant.is_staff:
+    if participant.is_staff:
         comments = Comment.objects.filter(post=post)
     else:
-        comments = Comment.objects.filter(post=post, user__is_npc=True) | Comment.objects.filter(post=post, user=participant)
+        comments = Comment.objects.filter(post=post, user=None) | Comment.objects.filter(post=post, user=participant)
 
 
     context = {
@@ -69,6 +71,19 @@ def new_post(request):
         if form.is_valid():
             new_post = form.save(commit=False)
             new_post.user = request.user
+            new_post.author = request.user.participant_code
+            new_post.permlink = slugify(new_post.title)
+
+            # New Post Preview
+            soup = BeautifulSoup(new_post.body, 'html.parser')
+            for img in soup.find_all('img'):
+                img.decompose()
+            
+            new_post.body_preview = soup.get_text(
+                separator=' ',
+                strip=True
+            )
+
             new_post.save()
             return redirect('posts:posts')
 

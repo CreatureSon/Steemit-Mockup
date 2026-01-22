@@ -21,9 +21,9 @@
             </div>
             {% endif %}
         </div>
-        {% if post.text %}
+        {% if post.body %}
         <div style="font-size:14px; margin-bottom:8px;">
-            {{post.text|safe}}
+            {{post.body|safe}}
         </div>
         {% endif %}
         {% if post.image_url %}
@@ -44,7 +44,7 @@
     <div style="background-color:white; color:black; border:1px solid #ddd; padding:8px; border-radius:8px;">
         <div style="font-size:12px; font-weight:bold">{{comment.user}}<span class="fas fa-comment"
                 style="margin-left:4px;"></span></div>
-        <div style="font-size:14px;">{{comment.text|linebreaks}}</div>
+        <div style="font-size:14px;">{{comment.body|linebreaks}}</div>
     </div>
     {% endfor %}
 </div>

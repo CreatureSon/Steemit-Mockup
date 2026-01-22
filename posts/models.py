@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 
 class Post(models.Model):
     # Local Participant Field
@@ -17,9 +18,10 @@ class Post(models.Model):
 
     # Post Data Fields
     title = models.CharField(max_length=150)
-    text = models.TextField(max_length=50000)
+    body = models.TextField(max_length=50000)
+    body_preview = models.TextField(max_length=10000)
     image_url = models.URLField(blank=True, null=True)
-    date = models.DateTimeField()
+    date = models.DateTimeField(default=timezone.now)
     votes = models.IntegerField(default=0)
     payout = models.CharField(max_length=30, default="0.00")
 
@@ -45,12 +47,20 @@ class Post(models.Model):
     
 class Comment(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    text = models.TextField()
-    date = models.DateTimeField(auto_now_add=True)
+    
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    
+    author = models.CharField(max_length=75)
+    body = models.TextField()
+    date = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.text[:50]}..."
+        return f"{self.body[:50]}..."
     
 class Vote(models.Model):
     UPVOTE = 1

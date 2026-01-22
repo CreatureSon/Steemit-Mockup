@@ -14,7 +14,7 @@
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
     {% block styles %}
-    <link rel="stylesheet" href="{% static 'participants/style.css' %}">
+    <link rel="stylesheet" href="{% static 'participants/styles.css' %}">
     {% endblock styles %}
 
 </head>
@@ -24,11 +24,9 @@
         <img class="img-fluid" src="{% static 'home/steemit-logo.png' %}" width="125" height="125">
     </a>
 
-    <main role="main" class="bg-light container">
-        <div class="pb-2 mb-2 border-bottom">
-            {% block page_header %}{% endblock page_header %}
-        </div>
+    {% block page_header %}{% endblock page_header %}
 
+    <main role="main" class="wallet-main bg-light">
         <div class="bg-light">
             {% block content %}{% endblock content %}
         </div>

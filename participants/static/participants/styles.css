@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    margin: 40px;
+    margin: 20px;
 }
 
 .consent-container {
@@ -28,4 +28,174 @@ body {
 .error {
     color: red;
     margin-top: 10px;
+}
+
+.wallet-main {
+    max-width: 1000px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+/* ===== Top user header (Steemit style) ===== */
+.wallet-user-box {
+    background: linear-gradient(180deg, #1c232b, #151b22);
+    color: #ffffff;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    max-width: none;
+}
+
+/* Center username content */
+.wallet-user-inner {
+    text-align: center;
+    padding: 1.25rem 1rem 0.3rem;
+}
+
+.wallet-username {
+    font-size: 1.5rem;
+    font-weight: 575;
+    margin: 0;
+    letter-spacing: 0.5px;
+}
+
+.wallet-join-date {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+}
+
+/* ===== Sub navigation bar ===== */
+.wallet-subnav {
+    background-color: #2b3a46; /* semi-dark grey */
+}
+
+.wallet-subnav-inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+    height: 46px;
+}
+
+/* Left + right groups */
+.wallet-subnav-left,
+.wallet-subnav-right {
+    display: flex;
+    align-items: stretch;
+    gap: 1.75rem;
+}
+
+/* Tabs */
+.wallet-tab {
+    color: #c0ccd6;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    padding: 0px 2px;
+    height: 100%;
+}
+
+.wallet-tab:hover {
+    color: #ffffff;
+}
+
+/* Active tab (Wallet) */
+.wallet-tab.active {
+    background-color: #e6ebf0; /* light grey */
+    color: #1e2a32;            /* dark text */
+    font-weight: 600;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+    padding: 0px 14px;
+}
+
+/* ===== Wallet container ===== */
+.wallet {
+    max-width: 2000px;
+    margin-top: 1.25rem;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1e2a32;
+}
+
+/* ===== Wallet rows ===== */
+.wallet-section {
+    background-color: #ffffff;
+    padding: 1.75rem 0;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid #e6ebef;
+}
+
+/* Remove hover animation (Steemit has none) */
+.wallet-section:hover {
+    transform: none;
+}
+
+/* STEEM POWER highlight */
+.wallet-section.highlighted {
+    background-color: #f7fafc;
+}
+
+/* ===== Columns ===== */
+.wallet-columns {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+/* Left info */
+.wallet-info {
+    max-width: 85%;
+}
+
+/* Right balance */
+.wallet-balance-col {
+    text-align: right;
+    white-space: nowrap;
+}
+
+/* ===== Headers & text ===== */
+.wallet-header {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.wallet-description {
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: #6b7c8f;
+    max-width: 600px;
+}
+
+/* ===== Balance text ===== */
+.wallet-balance-box {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #1e2a32;
+}
+
+.wallet-balance {
+    margin: 0;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 700px) {
+    .wallet-columns {
+        flex-direction: column;
+    }
+
+    .wallet-balance-col {
+        text-align: left;
+        margin-top: 0.75rem;
+    }
 }

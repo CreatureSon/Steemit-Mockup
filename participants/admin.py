@@ -8,14 +8,12 @@ from django import forms
 class ParticipantAdminAddForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Participant
-        fields = ('participant_code', 'is_staff', 'is_active', 'is_npc', 'is_superuser')
+        fields = ('participant_code', 'is_staff', 'is_active', 'is_superuser')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Always set NPC for admin-created users
-        self.fields['is_npc'].initial = True
-        self.fields['is_npc'].widget = forms.HiddenInput()
         self.fields['is_staff'].initial = False
         self.fields['is_staff'].widget = forms.HiddenInput()
         # Password fields are not required
@@ -26,15 +24,10 @@ class ParticipantAdminAddForm(UserCreationForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        is_npc = cleaned_data.get('is_npc', True)
-        if is_npc:
-            self.cleaned_data['password1'] = self.cleaned_data['password2'] = ParticipantManager.generate_random_password()
         return cleaned_data
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        if getattr(user, 'is_npc', False) and not getattr(user, 'is_superuser', False):
-            user.set_unusable_password()
         if commit:
             user.save()
         return user
@@ -63,33 +56,32 @@ class ParticipantAdmin(UserAdmin):
     add_form = ParticipantAdminAddForm
 
     # Fields to show in the admin list
-    list_display = ('participant_code', 'steem_dollars', 'steem_power', 'is_npc', 'is_staff', 'is_active')
-    list_filter = ('is_npc', 'is_staff', 'is_active')
+    list_display = ('participant_code', 'steem_dollars', 'steem_power', 'is_staff', 'is_active')
+    list_filter = ('is_staff', 'is_active')
     search_fields = ['participant_code']
     ordering = ['participant_code']
 
     fieldsets = (
         (None, {'fields': ('participant_code', 'password')}),
         ('Balances', {'fields': ('steem_dollars', 'steem_power')}),
-        ('Permissions', {'fields': ('is_npc', 'is_staff', 'is_active', 'groups', 'user_permissions')}),
+        ('Permissions', {'fields': ('is_staff', 'is_active', 'groups', 'user_permissions')}),
     )
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('participant_code', 'password1', 'password2', 'is_npc', 'is_staff', 'is_active')}
+            'fields': ('participant_code', 'password1', 'password2', 'is_staff', 'is_active')}
         ),
     )
 
     def get_fieldsets(self, request, obj=None):
         fsets = super().get_fieldsets(request, obj)
-        if obj and getattr(obj, 'is_npc', False):
+        if obj:
             # Filter out the 'Balances' section
             fsets = [fs for fs in fsets if fs[0] != 'Balances']
         return fsets
 
     def save_model(self, request, obj, form, change):
-        if getattr(obj, 'is_npc', False):
-            obj.set_unusable_password()
+        obj.set_unusable_password()
         super().save_model(request, obj, form, change)
 
 admin.site.register(Participant, ParticipantAdmin)

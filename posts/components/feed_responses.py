@@ -68,7 +68,7 @@ class FeedResponsesView(UnicornView):
         return self.post.votes + user_voted
     
     def calc_comments(self, user):
-        npc_count = Comment.objects.filter(post=self.post, user__is_npc=True).count()
+        npc_count = Comment.objects.filter(post=self.post, user=None).count()
         if user is not None and user.is_authenticated:
             participant_count = Comment.objects.filter(post=self.post, user=user).count()
             return npc_count + participant_count
