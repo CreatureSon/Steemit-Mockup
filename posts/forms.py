@@ -18,11 +18,11 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ['title', 'body']
         labels = {
-            'title':'Title:',
-            'body':'Description:'
+            'title':'',
+            'body':''
             }
 
         widgets = {
-            'title':forms.TextInput(attrs={'size':80}),
-            'body':forms.Textarea(attrs={'cols':80, 'rows':4}),
+            'title':forms.TextInput(attrs={'placeholder': 'Title', 'size':80}),
+            'body':forms.Textarea(attrs={'placeholder': 'Write your story...', 'cols':80, 'rows':4}),
             }

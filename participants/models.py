@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.utils import timezone
 from .managers import ParticipantManager
 
 class Participant(AbstractBaseUser, PermissionsMixin):
@@ -13,6 +14,9 @@ class Participant(AbstractBaseUser, PermissionsMixin):
     # Required Fields
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+
+    # Date the User was Created
+    date_joined = models.DateTimeField(default=timezone.now)
 
     # Login Fields
     USERNAME_FIELD = 'participant_code'

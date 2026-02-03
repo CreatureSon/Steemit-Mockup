@@ -6,7 +6,7 @@
 <div class="wallet-user-box">
     <div class="wallet-user-inner">
         <h1 class="wallet-username">{{ user.participant_code }}</h1>
-        <p class="wallet-join-date">Joined January 2026</p>
+        <p class="wallet-join-date">Joined {{ user.date_joined|date:"F Y" }}</p>
     </div>
 
     <!-- Sub-navigation bar -->
@@ -47,7 +47,7 @@
     </div>
 
     <!-- STEEM POWER -->
-    <div class="wallet-section highlighted">
+    <div class="wallet-section">
         <div class="wallet-columns">
             <div class="wallet-col wallet-info">
                 <div class="wallet-header">STEEM POWER</div>
@@ -58,7 +58,7 @@
             </div>
             <div class="wallet-col wallet-balance-col">
                 <div class="wallet-balance-box">
-                    <div class="wallet-balance">{{ user.steem_power }} SP</div>
+                    <div class="wallet-balance">{{ user.steem_power }} STEEM</div>
                 </div>
             </div>
         </div>

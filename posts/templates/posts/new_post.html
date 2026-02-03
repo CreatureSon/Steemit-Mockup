@@ -2,9 +2,7 @@
 
 {% block content %}
 
-<p><strong>User:</strong> {{ request.user.participant_code }}</p>
-
-<p>Create a New Post</p>
+<p>Posting to <strong>@{{ request.user.participant_code }} blog</strong></p>
 
 <form action="{% url 'posts:new_post' %}" method="post">
 
@@ -12,7 +10,7 @@
 
 {{form.as_p}}
 
-<button name="submit">Publish Post</button>
+<button name="submit">Post</button>
 
 </form>
 
