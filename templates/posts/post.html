@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+{% load markdownify %}
+{% load custom_times %}
+{% load unicorn %}
+
+{% block content %}
+{% unicorn_scripts %}
+{% csrf_token %}
+
+<div style="position:relative; background-color:white; padding:4px; border:1px solid #ddd; border-radius:8px; height:100%;">
+    <div style="padding:8px; max-height:100%; overflow-y:scroll;" class="scroll-frame">
+        {% if post.title %}
+    `   <div style="display:flex; flex-direction:column">
+            <h2 style="margin:0; font-weight:bold">{{post.title}}</h2>
+        </div>
+        {% endif %}
+        <div style="display:flex; flex-direction:row; align-items:center; padding-top:8px; padding-bottom:8px;">
+            {% if post.author_image %}
+            <img src="{{post.author_image}}" style="width:50px; height:50px; display:block; border-radius:50%;" />
+            {% endif %}
+            <div style="display:flex; flex-direction:row; flex-wrap: wrap; align-items:center; padding-left:10px; gap:4px; row-gap:0.5px; font-size:16px;">
+                {% if post.author %}
+                <span style="color: black; font-weight:600;">{{post.author}}</span>
+                <span style="color:#657786; font-weight:400;">({{post.author_reputation}})</span>
+                <span style="color:#657786;">in</span>
+                <span style="color: #657786; font-weight: 600">{{post.category_name}}</span>
+                <span style="color: #657786;">•</span>
+                <span style="color: #657786;">{{post.date|simple_time}}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if post.body %}
+        <div class="post-body">
+        {{post.body|markdownify}}
+        </div>
+        {% endif %}
+        {% if post.context %}
+        <div style="background-color:#e8e8e8; 
+                    margin-top:8px; padding:8px; 
+                    border-radius:5px; font-size:14px; color:#555;">
+        {{post.context}}
+        </div>
+        {% endif %}
+        {% unicorn 'post_responses' post_id=post.id %}
+    </div>
+</div>
+
+<div style="display:flex; flex-direction:column; gap:5px; padding-top:8px;">
+    {% for comment in comments %}
+        {% include 'posts/comments.html' with comment=comment depth=0 %}
+    {% endfor %}
+</div>
+
+{% endblock content %}

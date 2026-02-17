@@ -1,4 +1,5 @@
 from django_unicorn.components import UnicornView
+from django.contrib.contenttypes.models import ContentType
 from posts.models import Post, Vote
 
 class PostResponsesView(UnicornView):
@@ -20,7 +21,13 @@ class PostResponsesView(UnicornView):
 
         user = self.request.user
         if user is not None and user.is_authenticated:
-            voted = Vote.objects.filter(user=user, post=self.post).first()
+
+            post_content_type = ContentType.objects.get_for_model(Post)
+            voted = Vote.objects.filter(
+                content_type=post_content_type,
+                object_id=self.post.id,
+                user=user
+            ).first()
 
             if voted:
                 self.upvoted = voted.value == Vote.UPVOTE
@@ -44,7 +51,12 @@ class PostResponsesView(UnicornView):
         if not user.is_authenticated:
             return
         
-        voted = Vote.objects.filter(user=user, post=self.post).first()
+        post_content_type = ContentType.objects.get_for_model(Post)
+        voted = Vote.objects.filter(
+            user=user, 
+            content_type=post_content_type, 
+            object_id=self.post.id
+        ).first()
         
         if voted and voted.value == vote_type:
             voted.delete()
@@ -54,7 +66,11 @@ class PostResponsesView(UnicornView):
             voted.save()
             self.update_ui_state(vote_type)
         else:
-            Vote.objects.create(user=user, post=self.post, value=vote_type)
+            Vote.objects.create(
+                user=user, 
+                content_object=self.post, 
+                value=vote_type
+            )
             self.update_ui_state(vote_type)
 
         self.total_votes = self.calc_votes()
@@ -64,7 +80,12 @@ class PostResponsesView(UnicornView):
         self.downvoted = vote_value == Vote.DOWNVOTE  
 
     def calc_votes(self):
-        user_voted = 1 if Vote.objects.filter(user=self.request.user, post=self.post).exists() else 0
+        post_content_type = ContentType.objects.get_for_model(Post)
+        user_voted = 1 if Vote.objects.filter(
+            user=self.request.user, 
+            content_type=post_content_type, 
+            object_id=self.post.id
+        ).exists() else 0
         return self.post.votes + user_voted
 
     def toggle_resteem(self):

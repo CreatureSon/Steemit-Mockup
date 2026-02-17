@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "bad-words": "^4.0.0",
+    "dsteem": "^0.11.3",
+    "franc": "^6.2.0",
+    "spamscanner": "^6.1.5"
+  }
+}

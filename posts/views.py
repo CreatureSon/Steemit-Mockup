@@ -5,10 +5,13 @@ from bs4 import BeautifulSoup
 from .models import *
 from .forms import *
 
+from participants.decorators import study_time_required
+
 def index(request):
     return render(request, 'posts/index.html')
 
 @login_required
+@study_time_required
 def posts(request):
     participant = request.user
 
@@ -25,25 +28,29 @@ def posts(request):
     return render(request, "posts/posts.html", context)
 
 @login_required
+@study_time_required
 def post(request, post_id):
     participant = request.user
     post = Post.objects.get(id=post_id)
 
     if participant.is_staff:
-        comments = Comment.objects.filter(post=post)
+        # Only get top-level comments (no parent)
+        comments = Comment.objects.filter(post=post, parent__isnull=True)
     else:
-        comments = Comment.objects.filter(post=post, user=None) | Comment.objects.filter(post=post, user=participant)
-
+        # Only get top-level comments that are visible to this user
+        comments = (Comment.objects.filter(post=post, user=None, parent__isnull=True) | 
+                   Comment.objects.filter(post=post, user=participant, parent__isnull=True))
 
     context = {
-        'post': post, 
+        'post': post,
         'comments': comments,
-        'participatnt': request.user
+        'participant': request.user
         }
 
     return render(request, "posts/post.html", context)
 
 @login_required
+@study_time_required
 def new_comment(request, post_id):
     post = Post.objects.get(id=post_id)
 
@@ -63,6 +70,7 @@ def new_comment(request, post_id):
     return render(request, "posts/new_comment.html", context)
 
 @login_required
+@study_time_required
 def new_post(request):
     if request.method != 'POST':
         form = PostForm()

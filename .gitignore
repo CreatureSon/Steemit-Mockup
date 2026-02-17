@@ -6,6 +6,11 @@ __pycache__/
 # C extensions
 *.so
 
+# Node JS
+node_modules/
+node_modules/*
+package-lock.json
+
 # Random
 Participant_Data.*
 ~$Participant_Data.*

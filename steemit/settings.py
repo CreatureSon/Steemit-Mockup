@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'markdownify',
 ]
 
 MIDDLEWARE = [
@@ -119,6 +120,45 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+
+MARKDOWNIFY = {
+    "default": {
+        "MARKDOWN_EXTENSIONS": [
+            'markdown.extensions.extra',
+            'markdown.extensions.fenced_code',
+            'markdown.extensions.tables',
+            'markdown.extensions.codehilite',
+            'markdown.extensions.nl2br',
+            'markdown.extensions.md_in_html',
+        ],
+        "STRIP": False,
+        "WHITELIST_TAGS": [
+            'a', 'abbr', 'acronym',
+            'b', 'blockquote', 'em', 'i',
+            'li', 'ol', 'p', 'strong', 'ul',
+            'code', 'div', 'class', 'pre',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'img', 'br', 'hr', 'center',
+            'table', 'thead', 'tbody', 'tr', 'th', 'td',
+            'body', 'html', 'span', 'sup', 'sub',
+        ],
+        "WHITELIST_ATTRS": [
+            'href',
+            'src',
+            'alt',
+            'class',
+            'id',
+            'markdown',
+            'width', 'height',
+        ],
+        "WHITELIST_PROTOCOLS": [
+            'http',
+            'https',
+            'mailto',
+        ]
+    }
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

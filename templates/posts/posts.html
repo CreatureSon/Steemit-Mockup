@@ -1,10 +1,12 @@
-{% extends "posts/base.html" %}
+{% extends "base.html" %}
 {% load static %}
+{% load custom_times %}
 {% load unicorn %}
 
 {% block content %}
 {% unicorn_scripts %}
 {% csrf_token %}
+
 <div style="position:relative; padding:4px; border:1px solid #ddd; border-radius:8px; height:600px;">
   <div style="position:absolute; top:0; left:0; right:0; bottom:0; padding:8px; overflow-y:scroll;"
     class="scroll-frame">
@@ -14,12 +16,12 @@
                 box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
       <div style="display:flex; flex-direction:row; align-items:center; justify-content:space-between; padding-top:8px; padding-bottom:8px;">
         <div style="display:flex; flex-direction:row; align-items:center; font-size:12px; color:#888; gap:6px;">
-          {% if post.user.image %}
-          <img src="{{post.user.image.url}}" style="width:16px; height:16px; display:block; border-radius:50%;" />
+          {% if post.author_image %}
+          <img src="{{post.author_image}}" style="width:24px; height:24px; display:block; border-radius:50%;" />
           {% endif %}
           {% if post.author %}
-          <span style="font-weight:bold; font-size:14px;">{{post.author}}</span>
-          <span style="color:#888; font-size:12px;">{{post.date}}</span>
+          <span style="font-size:14px; color: #333333;">{{post.author}} ({{post.author_reputation}})</span>
+          <span style="font-size:13px; color:#888;">in {{post.category_name}} • {{post.date|simple_time}}</span>
           {% endif %}
         </div>
       </div>

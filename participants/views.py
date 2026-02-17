@@ -5,49 +5,45 @@ from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+
+from .decorators import study_time_required
 
 from .models import Participant
 from .forms import ParticipantLoginForm
 
 def begin(request):
+
     if request.user.is_authenticated:
         return redirect('posts:posts')
-    elif request.method == 'POST':
-        consent_given = request.POST.get('consent_checkbox')  # checkbox name in form
-        if consent_given:
-            # Generate unique participant code
-            prefix = 'Participant_'
-            existing_participants = Participant.objects.count()
-            participant_code = f"{prefix}{existing_participants + 1:03d}"
 
-            # Create new participant
-            participant = Participant.objects.create_user(
-                participant_code=participant_code,
-                password=None,
-                is_staff=False,
-                is_active=True,
-                steem_power=100.00,
-                steem_dollars=20.00
-            )
+    pid = request.GET.get('pid', None)
 
-            # Log in the user manually (bypassing password)
-            participant.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(request, participant)
+    if pid:
+        participant, created = Participant.objects.get_or_create(
+            participant_code=pid,
+            is_staff=False,
+            is_active=True,
+            steem_power=10.00,
+            steem_dollars=90.00
+        )
 
-            # Store participant_code in session
-            request.session['participant_code'] = participant.participant_code
+        # Log in the user manually (bypassing password)
+        login(request, participant, backend='django.contrib.auth.backends.ModelBackend')
 
-            # Redirect to posts page
-            return redirect('posts:posts')
+        if created:
+            # Set unusable password (required by AbstractBaseUser)
+            participant.set_unusable_password()
+            participant.save()
 
-        else:
-            # Consent not checked, maybe show an error
-            return render(request, 'participants/begin.html', {
-                'error': 'You must agree to the consent to continue.'
-            })
+        request.session['participant_code'] = participant.participant_code
+        request.session['joined_at'] = timezone.now().isoformat()
 
-    return render(request, 'participants/begin.html')
+        return redirect('posts:posts')
+    
+    return render(request, "error.html", {"message": "Missing PID"})
 
+@study_time_required
 def participant_login(request):
     error = None
     next_url = request.GET.get('next', None)  # Get the original URL if any
