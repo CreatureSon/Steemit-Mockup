@@ -6,6 +6,9 @@ from .managers import ParticipantManager
 class Participant(AbstractBaseUser, PermissionsMixin):
     # Unique Login code for participants
     participant_code = models.CharField(max_length=100, unique=True)
+
+    # Participant Account Info
+    participant_image = models.URLField(blank=True, null=True)
     
     # Participant Steemit Balances
     steem_dollars = models.DecimalField(max_digits=20, decimal_places=3, default=0)

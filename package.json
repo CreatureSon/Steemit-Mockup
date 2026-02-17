@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "bad-words": "^4.0.0",
+    "akismet-api": "^6.0.0",
     "dsteem": "^0.11.3",
     "franc": "^6.2.0",
-    "spamscanner": "^6.1.5"
+    "leo-profanity": "^1.9.0"
   }
 }

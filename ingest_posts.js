@@ -1,62 +1,85 @@
 const fs = require('fs');
 const dsteem = require('dsteem');
 const { franc } = require('franc');
-const SpamScanner = require('spamscanner');
-const Filter = require('bad-words');
+const { AkismetClient } = require('akismet-api');
+const filter = require('leo-profanity');
 
 const client = new dsteem.Client('https://api.steemit.com');
 const filePath = './posts.json';
-const filter = new Filter();
-const scanner = new SpamScanner();
+
+// Akismet Setup
+const AKISMET_KEY = process.env.AKISMET_KEY || '';
+const AKISMET_BLOG = "https://steemit.com/";
+
+const akismet = new AkismetClient({ key: AKISMET_KEY, blog: AKISMET_BLOG });
 
 const STEEMIT_SPAM_INDICATORS = [
   '@steemcleaners',
   '@spaminator'
 ];
 
+// Verify Akismet key on startup
+async function verifyAkismet() {
+  if (!AKISMET_KEY) {
+    console.warn('WARNING: AKISMET_KEY not set. Akismet checks will be skipped.');
+    return false;
+  }
+  try {
+    const isValid = await akismet.verifyKey();
+    if (!isValid) {
+      console.warn('WARNING: Akismet key is invalid. Akismet checks will be skipped.');
+    }
+    return isValid;
+  } catch (e) {
+    console.warn('WARNING: Could not reach Akismet:', e.message);
+    return false;
+  }
+}
+
 /**
  * Check if text contains profanity
  */
 function containsProfanity(text) {
   if (!text) return false;
-  return filter.isProfane(text);
+  return filter.check(text);
 }
 
 /**
  * Check if text looks like spam
  */
-async function isSpam(text, author, reputation) {
+async function isSpam(text, author, reputation, akismetReady) {
   if (!text) return false;
   
   const lowerText = text.toLowerCase();
   
   // Check for Steemit-specific spam indicators
-  const hasSteemitSpam = STEEMIT_SPAM_INDICATORS.some(indicator => 
+  if (STEEMIT_SPAM_INDICATORS.some(indicator => 
     lowerText.includes(indicator.toLowerCase())
-  );
-  
-  if (hasSteemitSpam) return true;
-  
+  )) return true;
+    
   // Check for very low reputation (likely spam account)
-  const hasLowReputation = reputation < 25;
+  const hasLowReputation = reputation < 10;
   
   // Check for excessive repetition (spam often repeats phrases)
   const words = text.split(/\s+/);
   const uniqueWords = new Set(words.map(w => w.toLowerCase()));
   const repetitionRatio = uniqueWords.size / words.length;
   const isRepetitive = words.length > 50 && repetitionRatio < 0.3;
+
+  if (hasLowReputation && isRepetitive) return true;
   
-  // Check for nonsensical AI-generated content patterns
-  const hasWeirdPatterns = /My (Adorable|Wonderful|Amazing) \w+ (desperately|always|often|carried)/i.test(text);
-  
-  if ((hasLowReputation && isRepetitive) || hasWeirdPatterns) return true;
-  
-  // Use spamscanner for general spam detection
+  if (!akismetReady) return false;
+
   try {
-    const result = await scanner.scan(text);
-    return result.is_spam;
+    return await akismet.checkSpam({
+      user_ip: '127.0.0.1',
+      user_agent: 'SteemitIngest/1.0',
+      content: text,
+      name: author,
+      type: 'comment'
+    });
   } catch (e) {
-    console.error('Error scanning for spam:', e.message);
+    console.error('Error checking spam with Akismet:', e.message);
     return false;
   }
 }
@@ -130,7 +153,7 @@ async function fetchAuthorProfile(author) {
   return { authorProfileImage, authorReputation };
 }
 
-async function fetchComments(author, permlink) {
+async function fetchComments(author, permlink, akismetReady) {
   // Only fetch if there are children
   const replies = await client.database.call('get_content_replies', [author, permlink]);
 
@@ -149,13 +172,13 @@ async function fetchComments(author, permlink) {
     // Filter out comments with profanity or spam
     if (containsProfanity(replyData.author) || 
         containsProfanity(replyData.body) ||
-        await isSpam(replyData.body, replyData.author, authorReputation)) {
+        await isSpam(replyData.body, replyData.author, authorReputation, akismetReady)) {
       console.log(`  Filtered comment by ${replyData.author} (profanity/spam)`);
       return null;
     }
 
     const nestedReplies = reply.children > 0
-      ? await fetchComments(reply.author, reply.permlink)
+      ? await fetchComments(reply.author, reply.permlink, akismetReady)
       : [];
 
     return {
@@ -175,6 +198,14 @@ async function fetchComments(author, permlink) {
 }
 
 (async function main() {
+
+  // Verify Akismet key is ready
+  const akismetReady = await verifyAkismet();
+  if (akismetReady) {
+    console.log('Akismet spam detection: ACTIVE');
+  } else {
+    console.log('Akismet spam detection: INACTIVE');
+  }
 
   const tags = ['food', 'travel', 'sports', 'home', 'life', 'work'];
   let allEnglishPosts = [];
@@ -245,7 +276,7 @@ async function fetchComments(author, permlink) {
         if (containsProfanity(fullPostData.author) || 
             containsProfanity(fullPostData.title) ||
             containsProfanity(fullPostData.body) ||
-            await isSpam(fullPostData.body, fullPostData.author, authorReputation)) {
+            await isSpam(fullPostData.body, fullPostData.author, authorReputation, akismetReady)) {
           console.log(`Filtered post by ${fullPostData.author}: "${fullPostData.title}" (profanity/spam)`);
           return null;
         }
@@ -267,7 +298,7 @@ async function fetchComments(author, permlink) {
         };
 
         postData.comments = fullPostData.children > 0 ?
-            await fetchComments(fullPostData.author, fullPostData.permlink) : [];
+            await fetchComments(fullPostData.author, fullPostData.permlink, akismetReady) : [];
         return postData;
       }
 

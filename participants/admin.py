@@ -8,7 +8,7 @@ from django import forms
 class ParticipantAdminAddForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
         model = Participant
-        fields = ('participant_code', 'is_staff', 'is_active', 'is_superuser')
+        fields = ('participant_code', 'participant_image', 'is_staff', 'is_active', 'is_superuser')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -56,13 +56,13 @@ class ParticipantAdmin(UserAdmin):
     add_form = ParticipantAdminAddForm
 
     # Fields to show in the admin list
-    list_display = ('participant_code', 'steem_dollars', 'steem_power', 'is_staff', 'is_active')
+    list_display = ('participant_code', 'participant_image', 'steem_dollars', 'steem_power', 'is_staff', 'is_active')
     list_filter = ('is_staff', 'is_active')
     search_fields = ['participant_code']
     ordering = ['participant_code']
 
     fieldsets = (
-        (None, {'fields': ('participant_code', 'password')}),
+        (None, {'fields': ('participant_code', 'password', 'participant_image')}),
         ('Balances', {'fields': ('steem_dollars', 'steem_power')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'groups', 'user_permissions')}),
     )

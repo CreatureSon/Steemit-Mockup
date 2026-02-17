@@ -51,8 +51,9 @@ def post(request, post_id):
 
 @login_required
 @study_time_required
-def new_comment(request, post_id):
+def new_comment(request, post_id, parent_id=None):
     post = Post.objects.get(id=post_id)
+    parent = Comment.objects.get(id=parent_id) if parent_id else None
 
     if request.method != 'POST':
         form = CommentForm()
@@ -62,10 +63,13 @@ def new_comment(request, post_id):
             new_comment = form.save(commit=False)
             new_comment.user = request.user
             new_comment.post = post
+            new_comment.parent = parent
+            new_comment.author = request.user.participant_code
+            new_comment.author_image = request.user.participant_image
             new_comment.save()
             return redirect('posts:post', post_id=post_id)
 
-    context = {'form': form, 'post': post}
+    context = {'form': form, 'post': post, 'parent': parent}
 
     return render(request, "posts/new_comment.html", context)
 
@@ -80,6 +84,7 @@ def new_post(request):
             new_post = form.save(commit=False)
             new_post.user = request.user
             new_post.author = request.user.participant_code
+            new_post.author_image = request.user.participant_image
             new_post.permlink = slugify(new_post.title)
 
             # New Post Preview

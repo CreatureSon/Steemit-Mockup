@@ -1,8 +1,12 @@
 {% load static %}
 {% load markdownify %}
 {% load custom_times %}
+{% load unicorn %}
 
-<div class="comment-container depth-{{ depth|default:0 }}" style="background-color:white; color:black; border:1px solid #ddd; padding:8px; border-radius:8px;">
+{% unicorn_scripts %}
+{% csrf_token %}
+
+<div class="comment-container depth-{{ depth|default:0 }}">
     <div style="display:flex; flex-direction:row; align-items:center; gap:8px; margin-bottom:6px;">
         {% if comment.author_image %}
         <img src="{{comment.author_image}}" style="width:32px; height:32px; display:block; border-radius:50%;" />
@@ -14,7 +18,11 @@
             <span style="font-size:12px; color:#888;">{{comment.date|simple_time}}</span>
         </div>
     </div>
-    <div style="font-size:14px; padding-left:40px;" class="post-body">{{comment.body|markdownify}}</div>
+    <div class="post-body comment-body">
+    {{comment.body|markdownify}}
+    </div>
+    <hr>
+    {% unicorn 'comment_responses' comment_id=comment.id %}
 </div>
 
 {% if comment.replies.all %}

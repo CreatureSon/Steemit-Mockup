@@ -4,17 +4,21 @@
 
 <p><a href="{% url 'posts:post' post.id %}">{{post}}</a></p>
 
-<p><strong>User:</strong> {{ request.user.username }}</p>
+<p><strong>User:</strong> {{ request.user.participant_code }}</p>
 
-<p>Add a new comment</p>
+{% if parent %}
+  <p>Replying to: <strong>{{ parent.author }}</strong></p>
+{% else %}
+  <p>Add a new comment</p>
+{% endif %}
 
-<form action="{% url 'posts:new_comment' post.id %}" method="post">
+<form action="{% if parent %}{% url 'posts:new_comment_reply' post.id parent.id %}{% else %}{% url 'posts:new_comment' post.id %}{% endif %}" method="post">
 
 {% csrf_token %}
 
 {{form.as_p}}
 
-<button name="submit">Add Comment</button>
+<button name="submit">Post Reply</button>
 
 </form>
 
