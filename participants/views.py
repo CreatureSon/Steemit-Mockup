@@ -40,9 +40,6 @@ def begin(request):
             steem_dollars=steem_dollars
         )
 
-        # Log in the user manually (bypassing password)
-        login(request, participant, backend='django.contrib.auth.backends.ModelBackend')
-
         if created:
             # Set unusable password (required by AbstractBaseUser)
             participant.set_unusable_password()
@@ -50,6 +47,9 @@ def begin(request):
 
         request.session['participant_code'] = participant.participant_code
         request.session['joined_at'] = timezone.now().isoformat()
+
+        # Log in the user manually (bypassing password)
+        login(request, participant, backend='django.contrib.auth.backends.ModelBackend')
 
         return redirect('posts:posts')
     
