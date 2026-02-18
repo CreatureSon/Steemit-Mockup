@@ -1,385 +1,280 @@
 BEGIN TRANSACTION;
-CREATE TABLE IF NOT EXISTS "auth_group" (
-	"id"	integer NOT NULL,
-	"name"	varchar(150) NOT NULL UNIQUE,
-	PRIMARY KEY("id" AUTOINCREMENT)
-);
-CREATE TABLE IF NOT EXISTS "auth_group_permissions" (
-	"id"	integer NOT NULL,
-	"group_id"	integer NOT NULL,
-	"permission_id"	integer NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("group_id") REFERENCES "auth_group"("id") DEFERRABLE INITIALLY DEFERRED,
-	FOREIGN KEY("permission_id") REFERENCES "auth_permission"("id") DEFERRABLE INITIALLY DEFERRED
-);
-CREATE TABLE IF NOT EXISTS "auth_permission" (
-	"id"	integer NOT NULL,
-	"content_type_id"	integer NOT NULL,
-	"codename"	varchar(100) NOT NULL,
-	"name"	varchar(255) NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("content_type_id") REFERENCES "django_content_type"("id") DEFERRABLE INITIALLY DEFERRED
-);
-CREATE TABLE IF NOT EXISTS "django_admin_log" (
-	"id"	integer NOT NULL,
-	"object_id"	text,
-	"object_repr"	varchar(200) NOT NULL,
-	"action_flag"	smallint unsigned NOT NULL CHECK("action_flag" >= 0),
-	"change_message"	text NOT NULL,
-	"content_type_id"	integer,
-	"user_id"	bigint NOT NULL,
-	"action_time"	datetime NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("content_type_id") REFERENCES "django_content_type"("id") DEFERRABLE INITIALLY DEFERRED,
-	FOREIGN KEY("user_id") REFERENCES "participants_participant"("id") DEFERRABLE INITIALLY DEFERRED
-);
-CREATE TABLE IF NOT EXISTS "django_content_type" (
-	"id"	integer NOT NULL,
-	"app_label"	varchar(100) NOT NULL,
-	"model"	varchar(100) NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT)
-);
-CREATE TABLE IF NOT EXISTS "django_migrations" (
-	"id"	integer NOT NULL,
-	"app"	varchar(255) NOT NULL,
-	"name"	varchar(255) NOT NULL,
-	"applied"	datetime NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT)
-);
-CREATE TABLE IF NOT EXISTS "django_session" (
-	"session_key"	varchar(40) NOT NULL,
-	"session_data"	text NOT NULL,
-	"expire_date"	datetime NOT NULL,
-	PRIMARY KEY("session_key")
-);
-CREATE TABLE IF NOT EXISTS "participants_participant" (
-	"id"	integer NOT NULL,
-	"password"	varchar(128) NOT NULL,
-	"last_login"	datetime,
-	"is_superuser"	bool NOT NULL,
-	"is_active"	bool NOT NULL,
-	"is_staff"	bool NOT NULL,
-	"steem_dollars"	decimal NOT NULL,
-	"steem_power"	decimal NOT NULL,
-	"date_joined"	datetime NOT NULL,
-	"participant_code"	varchar(100) NOT NULL UNIQUE,
-	"participant_image"	varchar(200),
-	PRIMARY KEY("id" AUTOINCREMENT)
-);
-CREATE TABLE IF NOT EXISTS "participants_participant_groups" (
-	"id"	integer NOT NULL,
-	"participant_id"	bigint NOT NULL,
-	"group_id"	integer NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("group_id") REFERENCES "auth_group"("id") DEFERRABLE INITIALLY DEFERRED,
-	FOREIGN KEY("participant_id") REFERENCES "participants_participant"("id") DEFERRABLE INITIALLY DEFERRED
-);
-CREATE TABLE IF NOT EXISTS "participants_participant_user_permissions" (
-	"id"	integer NOT NULL,
-	"participant_id"	bigint NOT NULL,
-	"permission_id"	integer NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("participant_id") REFERENCES "participants_participant"("id") DEFERRABLE INITIALLY DEFERRED,
-	FOREIGN KEY("permission_id") REFERENCES "auth_permission"("id") DEFERRABLE INITIALLY DEFERRED
-);
-CREATE TABLE IF NOT EXISTS "posts_comment" (
-	"id"	integer NOT NULL,
-	"author"	varchar(75) NOT NULL,
-	"permlink"	varchar(255),
-	"author_image"	varchar(500) NOT NULL,
-	"author_reputation"	integer NOT NULL,
-	"body"	text NOT NULL,
-	"date"	datetime NOT NULL,
-	"votes"	integer NOT NULL,
-	"payout"	varchar(30) NOT NULL,
-	"user_id"	bigint,
-	"post_id"	bigint NOT NULL,
-	"parent_id"	bigint,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("parent_id") REFERENCES "posts_comment"("id") DEFERRABLE INITIALLY DEFERRED,
-	FOREIGN KEY("post_id") REFERENCES "posts_post"("id") DEFERRABLE INITIALLY DEFERRED,
-	FOREIGN KEY("user_id") REFERENCES "participants_participant"("id") DEFERRABLE INITIALLY DEFERRED
-);
-CREATE TABLE IF NOT EXISTS "posts_post" (
-	"id"	integer NOT NULL,
-	"author"	varchar(75) NOT NULL,
-	"permlink"	varchar(255),
-	"author_image"	varchar(500) NOT NULL,
-	"author_reputation"	integer NOT NULL,
-	"title"	varchar(150) NOT NULL,
-	"body"	text NOT NULL,
-	"body_preview"	text NOT NULL,
-	"image_url"	varchar(200),
-	"category"	varchar(200) NOT NULL,
-	"category_name"	varchar(200) NOT NULL,
-	"date"	datetime NOT NULL,
-	"votes"	integer NOT NULL,
-	"payout"	varchar(30) NOT NULL,
-	"user_id"	bigint,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("user_id") REFERENCES "participants_participant"("id") DEFERRABLE INITIALLY DEFERRED
-);
-CREATE TABLE IF NOT EXISTS "posts_vote" (
-	"id"	integer NOT NULL,
-	"object_id"	integer unsigned NOT NULL CHECK("object_id" >= 0),
-	"value"	integer NOT NULL,
-	"voted_at"	datetime NOT NULL,
-	"content_type_id"	integer NOT NULL,
-	"user_id"	bigint NOT NULL,
-	PRIMARY KEY("id" AUTOINCREMENT),
-	FOREIGN KEY("content_type_id") REFERENCES "django_content_type"("id") DEFERRABLE INITIALLY DEFERRED,
-	FOREIGN KEY("user_id") REFERENCES "participants_participant"("id") DEFERRABLE INITIALLY DEFERRED
-);
-INSERT INTO "auth_permission" VALUES (1,1,'add_post','Can add post');
-INSERT INTO "auth_permission" VALUES (2,1,'change_post','Can change post');
-INSERT INTO "auth_permission" VALUES (3,1,'delete_post','Can delete post');
-INSERT INTO "auth_permission" VALUES (4,1,'view_post','Can view post');
-INSERT INTO "auth_permission" VALUES (5,2,'add_comment','Can add comment');
-INSERT INTO "auth_permission" VALUES (6,2,'change_comment','Can change comment');
-INSERT INTO "auth_permission" VALUES (7,2,'delete_comment','Can delete comment');
-INSERT INTO "auth_permission" VALUES (8,2,'view_comment','Can view comment');
-INSERT INTO "auth_permission" VALUES (9,3,'add_vote','Can add vote');
-INSERT INTO "auth_permission" VALUES (10,3,'change_vote','Can change vote');
-INSERT INTO "auth_permission" VALUES (11,3,'delete_vote','Can delete vote');
-INSERT INTO "auth_permission" VALUES (12,3,'view_vote','Can view vote');
-INSERT INTO "auth_permission" VALUES (13,4,'add_participant','Can add participant');
-INSERT INTO "auth_permission" VALUES (14,4,'change_participant','Can change participant');
-INSERT INTO "auth_permission" VALUES (15,4,'delete_participant','Can delete participant');
-INSERT INTO "auth_permission" VALUES (16,4,'view_participant','Can view participant');
-INSERT INTO "auth_permission" VALUES (17,5,'add_logentry','Can add log entry');
-INSERT INTO "auth_permission" VALUES (18,5,'change_logentry','Can change log entry');
-INSERT INTO "auth_permission" VALUES (19,5,'delete_logentry','Can delete log entry');
-INSERT INTO "auth_permission" VALUES (20,5,'view_logentry','Can view log entry');
-INSERT INTO "auth_permission" VALUES (21,6,'add_permission','Can add permission');
-INSERT INTO "auth_permission" VALUES (22,6,'change_permission','Can change permission');
-INSERT INTO "auth_permission" VALUES (23,6,'delete_permission','Can delete permission');
-INSERT INTO "auth_permission" VALUES (24,6,'view_permission','Can view permission');
-INSERT INTO "auth_permission" VALUES (25,7,'add_group','Can add group');
-INSERT INTO "auth_permission" VALUES (26,7,'change_group','Can change group');
-INSERT INTO "auth_permission" VALUES (27,7,'delete_group','Can delete group');
-INSERT INTO "auth_permission" VALUES (28,7,'view_group','Can view group');
-INSERT INTO "auth_permission" VALUES (29,8,'add_contenttype','Can add content type');
-INSERT INTO "auth_permission" VALUES (30,8,'change_contenttype','Can change content type');
-INSERT INTO "auth_permission" VALUES (31,8,'delete_contenttype','Can delete content type');
-INSERT INTO "auth_permission" VALUES (32,8,'view_contenttype','Can view content type');
-INSERT INTO "auth_permission" VALUES (33,9,'add_session','Can add session');
-INSERT INTO "auth_permission" VALUES (34,9,'change_session','Can change session');
-INSERT INTO "auth_permission" VALUES (35,9,'delete_session','Can delete session');
-INSERT INTO "auth_permission" VALUES (36,9,'view_session','Can view session');
-INSERT INTO "django_admin_log" VALUES (1,'19','Michigan''s Global Hustle: Big G Goes European!',3,'',1,1,'2026-02-16 19:34:08.722260');
-INSERT INTO "django_admin_log" VALUES (2,'18','Application for Steemit Challenge Season 30: Travel Videography Challenge',3,'',1,1,'2026-02-16 19:34:08.722305');
-INSERT INTO "django_admin_log" VALUES (3,'17','The Diary Game || 04-02-26 ||  After working 8 hours on duty, I went to Gulistan Market in the afternoon to buy products.',3,'',1,1,'2026-02-16 19:34:08.722325');
-INSERT INTO "django_admin_log" VALUES (4,'16','**Winter Wonderland Dates: Skip the Snow Day Snooze-Fest and Spark Some Joy!**',3,'',1,1,'2026-02-16 19:34:08.722340');
-INSERT INTO "django_admin_log" VALUES (5,'15','Beauty of Oman - Visual story - Part 1',3,'',1,1,'2026-02-16 19:34:08.722355');
-INSERT INTO "django_admin_log" VALUES (6,'14',' Where the Earth Breathes in Silence',3,'',1,1,'2026-02-16 19:34:08.722370');
-INSERT INTO "django_admin_log" VALUES (7,'13','Winter forest',3,'',1,1,'2026-02-16 19:34:08.722384');
-INSERT INTO "django_admin_log" VALUES (8,'12','Do you know Inari =/= Kennt ihr schon Inari? - Aizu Impressions 👹🍣🎎 Wonderful Japan ENG-GER',3,'',1,1,'2026-02-16 19:34:08.722397');
-INSERT INTO "django_admin_log" VALUES (9,'11','Beauty of Oman - Visual Story - Part 2',3,'',1,1,'2026-02-16 19:34:08.722411');
-INSERT INTO "django_admin_log" VALUES (10,'10','I witnessed The Commissioning Of The Omenuko Bridge by The Governor Of Abia State, Dr Alex Chioma Oti',3,'',1,1,'2026-02-16 19:34:08.722425');
-INSERT INTO "django_admin_log" VALUES (11,'9',' A Field Where Community Comes Alive',3,'',1,1,'2026-02-16 19:34:08.722439');
-INSERT INTO "django_admin_log" VALUES (12,'8','A Trip to Passport Office and Back Home',3,'',1,1,'2026-02-16 19:34:08.722453');
-INSERT INTO "django_admin_log" VALUES (13,'7','Upcoming Events in Belfast: What’s Happening in the City',3,'',1,1,'2026-02-16 19:34:08.722467');
-INSERT INTO "django_admin_log" VALUES (14,'6','Pupha Mahanatee Garden at Queen Sirikit Park, Bangkok',3,'',1,1,'2026-02-16 19:34:08.722482');
-INSERT INTO "django_admin_log" VALUES (15,'5','Wonderful experience traveling on holiday with my friend',3,'',1,1,'2026-02-16 19:34:08.722496');
-INSERT INTO "django_admin_log" VALUES (16,'4','Winter night sky',3,'',1,1,'2026-02-16 19:34:08.722509');
-INSERT INTO "django_admin_log" VALUES (17,'3','Winter landscape',3,'',1,1,'2026-02-16 19:34:08.722523');
-INSERT INTO "django_admin_log" VALUES (18,'2','All In One Travel Photography contest|| 2 steem power prize pool.||25',3,'',1,1,'2026-02-16 19:34:08.722536');
-INSERT INTO "django_admin_log" VALUES (19,'1','Big Storm⛈️💨 Grid outage 🪫🔋',3,'',1,1,'2026-02-16 19:34:08.722549');
-INSERT INTO "django_admin_log" VALUES (20,'168','unique opportunities for Australian players',3,'',1,1,'2026-02-16 20:04:00.167519');
-INSERT INTO "django_admin_log" VALUES (21,'167','unique opportunities for Australian players',3,'',1,1,'2026-02-16 20:04:00.167552');
-INSERT INTO "django_admin_log" VALUES (22,'166','The Audit is finally over',3,'',1,1,'2026-02-16 20:04:00.167566');
-INSERT INTO "django_admin_log" VALUES (23,'165','Teddy bears are tender childhood companions.',3,'',1,1,'2026-02-16 20:04:00.167577');
-INSERT INTO "django_admin_log" VALUES (24,'164','话要说给有回应的人听...',3,'',1,1,'2026-02-16 20:04:00.167589');
-INSERT INTO "django_admin_log" VALUES (25,'163','A cruel picture of the neglect of skinny street dogs.',3,'',1,1,'2026-02-16 20:04:00.167601');
-INSERT INTO "django_admin_log" VALUES (26,'162','An iron workshop',3,'',1,1,'2026-02-16 20:04:00.167611');
-INSERT INTO "django_admin_log" VALUES (27,'161','Khichuri',3,'',1,1,'2026-02-16 20:04:00.167621');
-INSERT INTO "django_admin_log" VALUES (28,'160','공원의자',3,'',1,1,'2026-02-16 20:04:00.167631');
-INSERT INTO "django_admin_log" VALUES (29,'159','A big iron tower',3,'',1,1,'2026-02-16 20:04:00.167641');
-INSERT INTO "django_admin_log" VALUES (30,'158','A sack of lentils',3,'',1,1,'2026-02-16 20:04:00.167650');
-INSERT INTO "django_admin_log" VALUES (31,'157','The Heritage',3,'',1,1,'2026-02-16 20:04:00.167661');
-INSERT INTO "django_admin_log" VALUES (32,'156','过年搞卫生洗蚊帐，忘...',3,'',1,1,'2026-02-16 20:04:00.167671');
-INSERT INTO "django_admin_log" VALUES (33,'155','Drawing Strength from God – When He Is Your Source',3,'',1,1,'2026-02-16 20:04:00.167681');
-INSERT INTO "django_admin_log" VALUES (34,'154','Ice Plant Flowers: A Chilly‑Cool Addition to Your Garden',3,'',1,1,'2026-02-16 20:04:00.167690');
-INSERT INTO "django_admin_log" VALUES (35,'153','Mung dal',3,'',1,1,'2026-02-16 20:04:00.167700');
-INSERT INTO "django_admin_log" VALUES (36,'152','A pharmacy shop',3,'',1,1,'2026-02-16 20:04:00.167709');
-INSERT INTO "django_admin_log" VALUES (37,'151','A new market',3,'',1,1,'2026-02-16 20:04:00.167719');
-INSERT INTO "django_admin_log" VALUES (38,'150','Standing Accountable for Your Decisions and Goals',3,'',1,1,'2026-02-16 20:04:00.167728');
-INSERT INTO "django_admin_log" VALUES (39,'149','The Unstoppable Blaze: Why Every Gardener Needs Tithonia',3,'',1,1,'2026-02-16 20:04:00.167738');
-INSERT INTO "django_admin_log" VALUES (40,'148','Weekend Study at Costa (2026-02-15)',3,'',1,1,'2026-02-16 20:04:00.167747');
-INSERT INTO "django_admin_log" VALUES (41,'147','What Planning Steps Reduce Cracking in Outdoor Hardscapes?',3,'',1,1,'2026-02-16 20:04:00.167758');
-INSERT INTO "django_admin_log" VALUES (42,'146','Experienced Interior Designer in Delhi NCR – Smart & Functional Spaces',3,'',1,1,'2026-02-16 20:04:00.167767');
-INSERT INTO "django_admin_log" VALUES (43,'145','Sunflower is a symbol of beauty',3,'',1,1,'2026-02-16 20:04:00.167777');
-INSERT INTO "django_admin_log" VALUES (44,'144','Day''s 8️⃣& 9️⃣Gold Coast Australia',3,'',1,1,'2026-02-16 20:04:00.167786');
-INSERT INTO "django_admin_log" VALUES (45,'143','Adjustments become a habit',3,'',1,1,'2026-02-16 20:04:00.167796');
-INSERT INTO "django_admin_log" VALUES (46,'142','10 years of expat life',3,'',1,1,'2026-02-16 20:04:00.167805');
-INSERT INTO "django_admin_log" VALUES (47,'141','Saving Children from Predators',3,'',1,1,'2026-02-16 20:04:00.167815');
-INSERT INTO "django_admin_log" VALUES (48,'140','How Daniel Guest Built Imagen Golf into a Leader in Modern Golf Instruction',3,'',1,1,'2026-02-16 20:04:00.167824');
-INSERT INTO "django_admin_log" VALUES (49,'139','Jack Grealish',3,'',1,1,'2026-02-16 20:04:00.167834');
-INSERT INTO "django_admin_log" VALUES (50,'138','Ball Sports Luggage Market Expansion Trends and Forecast to 2034',3,'',1,1,'2026-02-16 20:04:00.167844');
-INSERT INTO "django_admin_log" VALUES (51,'137','Ice Cold Revenge: USA Delivers Historic 5-0 Silence to Canada at Milano Cortina',3,'',1,1,'2026-02-16 20:04:00.167853');
-INSERT INTO "django_admin_log" VALUES (52,'136','Raheem Sterling has joined Dutch sign Feyenoord until the end of the season.',3,'',1,1,'2026-02-16 20:04:00.167862');
-INSERT INTO "django_admin_log" VALUES (53,'135','Understanding NEW88 and the Role of new88thai',3,'',1,1,'2026-02-16 20:04:00.167872');
-INSERT INTO "django_admin_log" VALUES (54,'134','The Scientific Formula: How Experts Quantify Sporting Difficulty.',3,'',1,1,'2026-02-16 20:04:00.167881');
-INSERT INTO "django_admin_log" VALUES (55,'133','Started Well Ended Horribly👿 (Blood Strike)',3,'',1,1,'2026-02-16 20:04:00.167891');
-INSERT INTO "django_admin_log" VALUES (56,'132','Frag Pro Shooter vol.4 ',3,'',1,1,'2026-02-16 20:04:00.167901');
-INSERT INTO "django_admin_log" VALUES (57,'131','First Match in Frag Pro Shooter vol.4',3,'',1,1,'2026-02-16 20:04:00.167910');
-INSERT INTO "django_admin_log" VALUES (58,'130','Ginga (FC MOBILE)',3,'',1,1,'2026-02-16 20:04:00.167919');
-INSERT INTO "django_admin_log" VALUES (59,'129','Tied Shotgun 1VS 1 (CODM)',3,'',1,1,'2026-02-16 20:04:00.167929');
-INSERT INTO "django_admin_log" VALUES (60,'128','Noob Battle Royale (CODM)',3,'',1,1,'2026-02-16 20:04:00.167939');
-INSERT INTO "django_admin_log" VALUES (61,'127','My Daily Walking Stats February 10 2026',3,'',1,1,'2026-02-16 20:04:00.167949');
-INSERT INTO "django_admin_log" VALUES (62,'126','My Daily Walking Stats February 11 2026',3,'',1,1,'2026-02-16 20:04:00.167959');
-INSERT INTO "django_admin_log" VALUES (63,'125','Rise and Shine: Unleashing Your Inner Phoenix (Fitness Style!)',3,'',1,1,'2026-02-16 20:04:00.167968');
-INSERT INTO "django_admin_log" VALUES (64,'124','The UFC heavyweight division is beyond repair',3,'',1,1,'2026-02-16 20:04:00.167978');
-INSERT INTO "django_admin_log" VALUES (65,'123','My Daily Walking Stats February 12 2026',3,'',1,1,'2026-02-16 20:04:00.167988');
-INSERT INTO "django_admin_log" VALUES (66,'122','The Super Bowl was a massive letdown this year',3,'',1,1,'2026-02-16 20:04:00.167998');
-INSERT INTO "django_admin_log" VALUES (67,'121','Koda''s Guide to Pure Joy: Unleashing Your Inner Puppy!',3,'',1,1,'2026-02-16 20:04:00.168007');
-INSERT INTO "django_admin_log" VALUES (68,'120','Referees eliminated',3,'',1,1,'2026-02-16 20:04:00.168016');
-INSERT INTO "django_admin_log" VALUES (69,'119','What winter Olympic sports are you watching?',3,'',1,1,'2026-02-16 20:04:00.168025');
-INSERT INTO "django_admin_log" VALUES (70,'118','My Daily Walking Stats February 13 2026',3,'',1,1,'2026-02-16 20:04:00.168035');
-INSERT INTO "django_admin_log" VALUES (71,'117','Daily Grind or Daily Gainz? Can You REALLY Lift Every Single Day?',3,'',1,1,'2026-02-16 20:04:00.168044');
-INSERT INTO "django_admin_log" VALUES (72,'116','My Daily Walking Stats February 14 2026',3,'',1,1,'2026-02-16 20:04:00.168055');
-INSERT INTO "django_admin_log" VALUES (73,'115','Your Chase Sapphire Just Got a Workout Buddy (and a Discount!)',3,'',1,1,'2026-02-16 20:04:00.168065');
-INSERT INTO "django_admin_log" VALUES (74,'114','ICC Men''s T20 World Cup 2026 - South Africa vs Afghanistan : A Magical Show!',3,'',1,1,'2026-02-16 20:04:00.168074');
-INSERT INTO "django_admin_log" VALUES (75,'113','Get Ready for the Future: It''s Going to Be Quantum and Nano-tastic!',3,'',1,1,'2026-02-16 20:04:00.168083');
-INSERT INTO "django_admin_log" VALUES (76,'112','Plot Twist! Pep''s Sweating Over Haaland Before the Arsenal Showdown!',3,'',1,1,'2026-02-16 20:04:00.168092');
-INSERT INTO "django_admin_log" VALUES (77,'111','The popcorn are ready',3,'',1,1,'2026-02-16 20:04:00.168102');
-INSERT INTO "django_admin_log" VALUES (78,'110','Still life in this old dog yet...',3,'',1,1,'2026-02-16 20:04:00.168111');
-INSERT INTO "django_admin_log" VALUES (79,'109','When Rivalry Becomes One-Sided: India vs Pakistan in Modern Cricket',3,'',1,1,'2026-02-16 20:04:00.168120');
-INSERT INTO "django_admin_log" VALUES (80,'108','Don''t call it shame, just call it Inter',3,'',1,1,'2026-02-16 20:04:00.168130');
-INSERT INTO "django_admin_log" VALUES (81,'107','OWeekly CRICKET Review - CXVii | The T20 World Cup',3,'',1,1,'2026-02-16 20:04:00.168139');
-INSERT INTO "django_admin_log" VALUES (82,'106','The Adorable Cunt',3,'',1,1,'2026-02-16 20:04:00.168148');
-INSERT INTO "django_admin_log" VALUES (83,'105',' Brainy Fisherman',3,'',1,1,'2026-02-16 20:04:00.168157');
-INSERT INTO "django_admin_log" VALUES (84,'104','A Colourful Bird',3,'',1,1,'2026-02-16 20:04:00.168166');
-INSERT INTO "django_admin_log" VALUES (85,'103','Shishkino',3,'',1,1,'2026-02-16 20:04:00.168177');
-INSERT INTO "django_admin_log" VALUES (86,'102','My Adorable Worm',3,'',1,1,'2026-02-16 20:04:00.168186');
-INSERT INTO "django_admin_log" VALUES (87,'101','Their Yellow Jerk',3,'',1,1,'2026-02-16 20:04:00.168195');
-INSERT INTO "django_admin_log" VALUES (88,'100',' Green Geek',3,'',1,1,'2026-02-16 20:04:00.168204');
-INSERT INTO "django_admin_log" VALUES (89,'99','A Lucky Robin',3,'',1,1,'2026-02-16 20:04:00.168213');
-INSERT INTO "django_admin_log" VALUES (90,'98','The Energetic Bird',3,'',1,1,'2026-02-16 20:04:00.168222');
-INSERT INTO "django_admin_log" VALUES (91,'97','My Cute Robin',3,'',1,1,'2026-02-16 20:04:00.168231');
-INSERT INTO "django_admin_log" VALUES (92,'96','His Troubled Hedgehog',3,'',1,1,'2026-02-16 20:04:00.168240');
-INSERT INTO "django_admin_log" VALUES (93,'95',' A Quiet Story of Everyday Life',3,'',1,1,'2026-02-16 20:04:00.168250');
-INSERT INTO "django_admin_log" VALUES (94,'94','Delicious Family Lunch',3,'',1,1,'2026-02-16 20:04:00.168259');
-INSERT INTO "django_admin_log" VALUES (95,'93','Wenfeng · A Gathering in Silken Lights',3,'',1,1,'2026-02-16 20:04:00.168269');
-INSERT INTO "django_admin_log" VALUES (96,'92','Terminal',3,'',1,1,'2026-02-16 20:04:00.168278');
-INSERT INTO "django_admin_log" VALUES (97,'91','A View from the 42nd Floor of a Building in Kuala Lumpur',3,'',1,1,'2026-02-16 20:04:00.168288');
-INSERT INTO "django_admin_log" VALUES (98,'90','Solo Travel is SO In: Why Everyone''s Hitting the Road Alone!',3,'',1,1,'2026-02-16 20:04:00.168297');
-INSERT INTO "django_admin_log" VALUES (99,'89','Eurasian blue tit (Cyanistes caeruleus) #5',3,'',1,1,'2026-02-16 20:04:00.168306');
-INSERT INTO "django_admin_log" VALUES (100,'88','The Serene Majesty of the Elbe River',3,'',1,1,'2026-02-16 20:04:00.168315');
-INSERT INTO "django_admin_log" VALUES (101,'87','Wakehurst Botanical  gardens',3,'',1,1,'2026-02-16 20:04:00.168324');
-INSERT INTO "django_admin_log" VALUES (102,'86','August Light at the Suzhou Museum',3,'',1,1,'2026-02-16 20:04:00.168334');
-INSERT INTO "django_admin_log" VALUES (103,'85','Day 🔟Gold Coast Australia',3,'',1,1,'2026-02-16 20:04:00.168343');
-INSERT INTO "django_admin_log" VALUES (104,'84','Our morning trip to buy quail birds',3,'',1,1,'2026-02-16 20:04:00.168353');
-INSERT INTO "django_admin_log" VALUES (105,'83','Winter lake walk',3,'',1,1,'2026-02-16 20:04:00.168362');
-INSERT INTO "django_admin_log" VALUES (106,'82','Where Gratitude Walks the Hills of Gombak',3,'',1,1,'2026-02-16 20:04:00.168371');
-INSERT INTO "django_admin_log" VALUES (107,'81','✨ A Place Where Light Speaks – A Journey Through Sacred Architecture',3,'',1,1,'2026-02-16 20:04:00.168380');
-INSERT INTO "django_admin_log" VALUES (108,'80','Let''s visit Oyama Shrine 尾山神社 👹🍣🎎 Wonderful Japan',3,'',1,1,'2026-02-16 20:04:00.168390');
-INSERT INTO "django_admin_log" VALUES (109,'79','Get Ready to Groove! Barranquilla Crowned World''s Most Creative City!',3,'',1,1,'2026-02-16 20:04:00.168488');
-INSERT INTO "django_admin_log" VALUES (110,'78','Eurasian blue tit (Cyanistes caeruleus) #4',3,'',1,1,'2026-02-16 20:04:00.168573');
-INSERT INTO "django_admin_log" VALUES (111,'77','A wave come splashing your toes',3,'',1,1,'2026-02-16 20:04:00.168595');
-INSERT INTO "django_admin_log" VALUES (112,'76','The Joyful Moment of Casting a Vote',3,'',1,1,'2026-02-16 20:04:00.168611');
-INSERT INTO "django_admin_log" VALUES (113,'75','Exploring the Marble and Tiles market',3,'',1,1,'2026-02-16 20:04:00.168629');
-INSERT INTO "django_admin_log" VALUES (114,'74','Winter forest',3,'',1,1,'2026-02-16 20:04:00.168645');
-INSERT INTO "django_admin_log" VALUES (115,'73','Application for Steemit Challenge Season 30: Travel Videography Challenge',3,'',1,1,'2026-02-16 20:04:00.168662');
-INSERT INTO "django_admin_log" VALUES (116,'72','The Diary Game || 04-02-26 ||  After working 8 hours on duty, I went to Gulistan Market in the afternoon to buy products.',3,'',1,1,'2026-02-16 20:04:00.168679');
-INSERT INTO "django_admin_log" VALUES (117,'71','Delicious Chicken Jalfrezi',3,'',1,1,'2026-02-16 20:04:00.168695');
-INSERT INTO "django_admin_log" VALUES (118,'70','Frozen Arepas - 10 February 2026',3,'',1,1,'2026-02-16 20:04:00.168711');
-INSERT INTO "django_admin_log" VALUES (119,'69','Dahi – The Taste of Tradition and Health',3,'',1,1,'2026-02-16 20:04:00.168728');
-INSERT INTO "django_admin_log" VALUES (120,'68','SLC29-W5 // "Boiled Chicken Recipes"',3,'',1,1,'2026-02-16 20:04:12.124710');
-INSERT INTO "django_admin_log" VALUES (121,'67','Traditional Sweets & Cakes- 📣 ✨ THE BEST FOOD POST ✨ 📣WEEK #161',3,'',1,1,'2026-02-16 20:04:12.124747');
-INSERT INTO "django_admin_log" VALUES (122,'66','Loose weight naturally',3,'',1,1,'2026-02-16 20:04:12.124772');
-INSERT INTO "django_admin_log" VALUES (123,'65','Vegetable noodles',3,'',1,1,'2026-02-16 20:04:12.124780');
-INSERT INTO "django_admin_log" VALUES (124,'64','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe.',3,'',1,1,'2026-02-16 20:04:12.124789');
-INSERT INTO "django_admin_log" VALUES (125,'63','Oat pancake in a bit',3,'',1,1,'2026-02-16 20:04:12.124797');
-INSERT INTO "django_admin_log" VALUES (126,'62','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe.',3,'',1,1,'2026-02-16 20:04:12.124805');
-INSERT INTO "django_admin_log" VALUES (127,'61','SLC29-W5 // "Boiled Chicken Recipes"',3,'',1,1,'2026-02-16 20:04:12.124815');
-INSERT INTO "django_admin_log" VALUES (128,'60','week #12 begins And Week #11 Winners 🏆🏆🏆 announcement Of the Delicious 😋 Food Highlights',3,'',1,1,'2026-02-16 20:04:12.124824');
-INSERT INTO "django_admin_log" VALUES (129,'59','SLC29-W5 // "Boiled Chicken Recipes"',3,'',1,1,'2026-02-16 20:04:12.124832');
-INSERT INTO "django_admin_log" VALUES (130,'58','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe',3,'',1,1,'2026-02-16 20:04:12.124840');
-INSERT INTO "django_admin_log" VALUES (131,'57','Late Night Cravings: Listening Gently to Your Body at Night',3,'',1,1,'2026-02-16 20:04:12.124848');
-INSERT INTO "django_admin_log" VALUES (132,'56','Daily Menu Delicacies Week No. 110 date (14-02-2026) // The name of your choice, (Try to be brief, we don''t want very long texts).',3,'',1,1,'2026-02-16 20:04:12.124856');
-INSERT INTO "django_admin_log" VALUES (133,'55','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe.',3,'',1,1,'2026-02-16 20:04:12.124864');
-INSERT INTO "django_admin_log" VALUES (134,'54','Application Steemit Challenge Season 30 || Traditional Steam Cooking',3,'',1,1,'2026-02-16 20:04:12.124872');
-INSERT INTO "django_admin_log" VALUES (135,'53','Egg noodles',3,'',1,1,'2026-02-16 20:04:12.124881');
-INSERT INTO "django_admin_log" VALUES (136,'52','Weekly contest|| Daily menu delicacies week of 109',3,'',1,1,'2026-02-16 20:04:12.124889');
-INSERT INTO "django_admin_log" VALUES (137,'51','The Boat Noodle Odyssey: A Braised Pork Masterpiece!',3,'',1,1,'2026-02-16 20:04:12.124897');
-INSERT INTO "django_admin_log" VALUES (138,'50','SLC29-W5 // "Boiled Chicken Recipes".',3,'',1,1,'2026-02-16 20:04:12.124905');
-INSERT INTO "django_admin_log" VALUES (139,'49','Recipe of the day week#97 Left over rice|| making Caremal kheer|| Delicious desert at home',3,'',1,1,'2026-02-16 20:04:12.124913');
-INSERT INTO "django_admin_log" VALUES (140,'48','Chicken Biryani Recipe.',3,'',1,1,'2026-02-16 20:04:12.124924');
-INSERT INTO "django_admin_log" VALUES (141,'47','Allah''s gift is a storehouse of eggs."Zirabo"',3,'',1,1,'2026-02-16 20:04:12.124947');
-INSERT INTO "django_admin_log" VALUES (142,'46','Daily Menu Delicacies Week No.109. date (11-02-2026) // (Tasty Delights from Morning to Night) 🤤🍽️',3,'',1,1,'2026-02-16 20:04:12.124958');
-INSERT INTO "django_admin_log" VALUES (143,'45','Spicy fried chickpeas recipe',3,'',1,1,'2026-02-16 20:04:12.124966');
-INSERT INTO "django_admin_log" VALUES (144,'44','Chicken and potato croquettes | chicken recipe slc29-w5',3,'',1,1,'2026-02-16 20:04:12.124974');
-INSERT INTO "django_admin_log" VALUES (145,'43','Daily Menu Delicacies Week No.110. date (14-02-2026) // Yummy day with loved ones',3,'',1,1,'2026-02-16 20:04:12.124983');
-INSERT INTO "django_admin_log" VALUES (146,'42','Steemit Challenge pitch season 30: Meals and Cultures of the World.',3,'',1,1,'2026-02-16 20:04:12.124991');
-INSERT INTO "django_admin_log" VALUES (147,'41','"Recipe of the Day, Week No. 97: (Aromatic Bhindi Chicken Delight  )"',3,'',1,1,'2026-02-16 20:04:12.124999');
-INSERT INTO "django_admin_log" VALUES (148,'40','My Foody Day at Home:  Coconut Rice and delicious Soup',3,'',1,1,'2026-02-16 20:04:12.125007');
-INSERT INTO "django_admin_log" VALUES (149,'39','Tasty jalebi',3,'',1,1,'2026-02-16 20:04:12.125018');
-INSERT INTO "django_admin_log" VALUES (150,'38','Boiled eggs and piyaju food',3,'',1,1,'2026-02-16 20:04:12.125031');
-INSERT INTO "django_admin_log" VALUES (151,'37','SLC29-W6// "Chicken With Rice"',3,'',1,1,'2026-02-16 20:04:12.125053');
-INSERT INTO "django_admin_log" VALUES (152,'36','**Winter Wonderland Dates: Skip the Snow Day Snooze-Fest and Spark Some Joy!**',3,'',1,1,'2026-02-16 20:04:12.125060');
-INSERT INTO "django_admin_log" VALUES (153,'35','Beauty of Oman - Visual story - Part 1',3,'',1,1,'2026-02-16 20:04:12.125068');
-INSERT INTO "django_admin_log" VALUES (154,'34',' Where the Earth Breathes in Silence',3,'',1,1,'2026-02-16 20:04:12.125076');
-INSERT INTO "django_admin_log" VALUES (155,'33','Winter forest',3,'',1,1,'2026-02-16 20:04:12.125085');
-INSERT INTO "django_admin_log" VALUES (156,'32','Do you know Inari =/= Kennt ihr schon Inari? - Aizu Impressions 👹🍣🎎 Wonderful Japan ENG-GER',3,'',1,1,'2026-02-16 20:04:12.125106');
-INSERT INTO "django_admin_log" VALUES (157,'31','Beauty of Oman - Visual Story - Part 2',3,'',1,1,'2026-02-16 20:04:12.125114');
-INSERT INTO "django_admin_log" VALUES (158,'30','I witnessed The Commissioning Of The Omenuko Bridge by The Governor Of Abia State, Dr Alex Chioma Oti',3,'',1,1,'2026-02-16 20:04:12.125126');
-INSERT INTO "django_admin_log" VALUES (159,'29',' A Field Where Community Comes Alive',3,'',1,1,'2026-02-16 20:04:12.125134');
-INSERT INTO "django_admin_log" VALUES (160,'28','A Trip to Passport Office and Back Home',3,'',1,1,'2026-02-16 20:04:12.125142');
-INSERT INTO "django_admin_log" VALUES (161,'27','Upcoming Events in Belfast: What’s Happening in the City',3,'',1,1,'2026-02-16 20:04:12.125153');
-INSERT INTO "django_admin_log" VALUES (162,'26','Pupha Mahanatee Garden at Queen Sirikit Park, Bangkok',3,'',1,1,'2026-02-16 20:04:12.125170');
-INSERT INTO "django_admin_log" VALUES (163,'25','Wonderful experience traveling on holiday with my friend',3,'',1,1,'2026-02-16 20:04:12.125178');
-INSERT INTO "django_admin_log" VALUES (164,'24','Winter night sky',3,'',1,1,'2026-02-16 20:04:12.125185');
-INSERT INTO "django_admin_log" VALUES (165,'23','Michigan''s Global Hustle: Big G Goes European!',3,'',1,1,'2026-02-16 20:04:12.125193');
-INSERT INTO "django_admin_log" VALUES (166,'22','Winter landscape',3,'',1,1,'2026-02-16 20:04:12.125200');
-INSERT INTO "django_admin_log" VALUES (167,'21','All In One Travel Photography contest|| 2 steem power prize pool.||25',3,'',1,1,'2026-02-16 20:04:12.125208');
-INSERT INTO "django_admin_log" VALUES (168,'20','Big Storm⛈️💨 Grid outage 🪫🔋',3,'',1,1,'2026-02-16 20:04:12.125218');
-INSERT INTO "django_admin_log" VALUES (169,'345','MAYBE THIS TOO?...',3,'',2,1,'2026-02-18 06:51:54.953739');
-INSERT INTO "django_admin_log" VALUES (170,'344','WILL THIS WORK?...',3,'',2,1,'2026-02-18 06:51:54.953769');
-INSERT INTO "django_admin_log" VALUES (171,'343','Dangit...',3,'',2,1,'2026-02-18 06:51:54.953782');
-INSERT INTO "django_admin_log" VALUES (172,'342','This did not work... or maybe it did?...',3,'',2,1,'2026-02-18 06:51:54.953791');
-INSERT INTO "django_admin_log" VALUES (173,'341','Test...',3,'',2,1,'2026-02-18 06:51:54.953801');
-INSERT INTO "django_content_type" VALUES (1,'posts','post');
-INSERT INTO "django_content_type" VALUES (2,'posts','comment');
-INSERT INTO "django_content_type" VALUES (3,'posts','vote');
-INSERT INTO "django_content_type" VALUES (4,'participants','participant');
-INSERT INTO "django_content_type" VALUES (5,'admin','logentry');
-INSERT INTO "django_content_type" VALUES (6,'auth','permission');
-INSERT INTO "django_content_type" VALUES (7,'auth','group');
-INSERT INTO "django_content_type" VALUES (8,'contenttypes','contenttype');
-INSERT INTO "django_content_type" VALUES (9,'sessions','session');
-INSERT INTO "django_migrations" VALUES (1,'contenttypes','0001_initial','2026-02-16 13:46:06.891510');
-INSERT INTO "django_migrations" VALUES (2,'contenttypes','0002_remove_content_type_name','2026-02-16 13:46:06.899987');
-INSERT INTO "django_migrations" VALUES (3,'auth','0001_initial','2026-02-16 13:46:06.912460');
-INSERT INTO "django_migrations" VALUES (4,'auth','0002_alter_permission_name_max_length','2026-02-16 13:46:06.920528');
-INSERT INTO "django_migrations" VALUES (5,'auth','0003_alter_user_email_max_length','2026-02-16 13:46:06.926026');
-INSERT INTO "django_migrations" VALUES (6,'auth','0004_alter_user_username_opts','2026-02-16 13:46:06.932977');
-INSERT INTO "django_migrations" VALUES (7,'auth','0005_alter_user_last_login_null','2026-02-16 13:46:06.938429');
-INSERT INTO "django_migrations" VALUES (8,'auth','0006_require_contenttypes_0002','2026-02-16 13:46:06.941541');
-INSERT INTO "django_migrations" VALUES (9,'auth','0007_alter_validators_add_error_messages','2026-02-16 13:46:06.947269');
-INSERT INTO "django_migrations" VALUES (10,'auth','0008_alter_user_username_max_length','2026-02-16 13:46:06.953152');
-INSERT INTO "django_migrations" VALUES (11,'auth','0009_alter_user_last_name_max_length','2026-02-16 13:46:06.958583');
-INSERT INTO "django_migrations" VALUES (12,'auth','0010_alter_group_name_max_length','2026-02-16 13:46:06.967155');
-INSERT INTO "django_migrations" VALUES (13,'auth','0011_update_proxy_permissions','2026-02-16 13:46:06.972391');
-INSERT INTO "django_migrations" VALUES (14,'auth','0012_alter_user_first_name_max_length','2026-02-16 13:46:06.978909');
-INSERT INTO "django_migrations" VALUES (15,'participants','0001_initial','2026-02-16 13:46:06.990544');
-INSERT INTO "django_migrations" VALUES (16,'admin','0001_initial','2026-02-16 13:46:07.001949');
-INSERT INTO "django_migrations" VALUES (17,'admin','0002_logentry_remove_auto_add','2026-02-16 13:46:07.013282');
-INSERT INTO "django_migrations" VALUES (18,'admin','0003_logentry_add_action_flag_choices','2026-02-16 13:46:07.021212');
-INSERT INTO "django_migrations" VALUES (19,'participants','0002_rename_steemit_dollars_participant_steem_dollars_and_more','2026-02-16 13:46:07.042803');
-INSERT INTO "django_migrations" VALUES (20,'participants','0003_remove_participant_is_npc','2026-02-16 13:46:07.054338');
-INSERT INTO "django_migrations" VALUES (21,'participants','0004_participant_date_joined','2026-02-16 13:46:07.067698');
-INSERT INTO "django_migrations" VALUES (22,'participants','0005_alter_participant_participant_code','2026-02-16 13:46:07.078684');
-INSERT INTO "django_migrations" VALUES (23,'posts','0001_initial','2026-02-16 13:46:07.103310');
-INSERT INTO "django_migrations" VALUES (24,'sessions','0001_initial','2026-02-16 13:46:07.112255');
-INSERT INTO "django_migrations" VALUES (25,'posts','0002_comment_parent','2026-02-16 13:53:07.185534');
-INSERT INTO "django_migrations" VALUES (26,'participants','0006_participant_participant_image','2026-02-17 21:13:38.515552');
-INSERT INTO "django_session" VALUES ('n51xohxcwgcfu5r6b9ppw44sq45f29n5','.eJxVjMsOwiAQRf-FtSE8p-DSvd9AmAGkaiAp7cr479qkC93ec859sRC3tYZt5CXMiZ2ZZKffDSM9cttBusd265x6W5cZ-a7wgw5-7Sk_L4f7d1DjqN_agtAW0SvATAImKsKoUqSURmsCsqqglZ4AyUWXvNJEZAQp4cDmCdj7A9cwN5Y:1vrywo:3zsMnsYZqdf-cqbTsmwurbtMzce7FeykIhEDKELqRhQ','2026-03-02 13:47:34.548691');
-INSERT INTO "participants_participant" VALUES (1,'pbkdf2_sha256$1000000$Oegxk175GMfKnFYN0uJQix$ocSvRwiM4eSnIpHMTrFmjeFeS7bEBdT74TUrs/V0/zE=','2026-02-16 13:47:34.542964',1,1,1,0,0,'2026-02-16 13:47:02.099426','baylor_admin','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128');
-INSERT INTO "posts_comment" VALUES (338,'fuli','20260213t085018750z','https://cdn.steemitimages.com/DQmRM2xQTzdHki2KpjskUgYuqty3J9gvq5JuNvsuXn3Yt8u/Screen%20Shot%202020-03-26%20at%2010.35.57%20AM.jpg',65,'Thank you for sharing on steem! I''m witness fuli, and I''ve given you a free upvote. If you''d like to support me, please consider voting at https://steemitwallet.com/~witnesses 🌟','2026-02-13 14:50:21',0,'$0.00',NULL,183,NULL);
-INSERT INTO "posts_comment" VALUES (339,'anzare084','tacbk0','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'nice','2026-02-12 15:55:15',0,'$0.00',NULL,184,NULL);
-INSERT INTO "posts_comment" VALUES (340,'starrykay','tak97j','https://cdn.steemitimages.com/DQmeDLwypMuHfMhxzHiHAkYj642jNoLyoJSFw4DHgN1M13e/IMG_0699.png',35,'It feels like you were talking right to me, I’m on a journey!','2026-02-16 22:45:21',0,'$0.00',NULL,196,NULL);
-INSERT INTO "posts_post" VALUES (169,'live.log','michigans-global-hustle-big-g-goes-european-1771261784','https://cdn.steemitimages.com/DQmaJzZcFNFEgDkT2bVJgHNc4yABkzNVhvw94TngcK3Yk5x/Screenshot_20191115-123022_Instagram.jpg',71,'Michigan''s Global Hustle: Big G Goes European!','Ever wonder what your state governor does when they''re not, you know, governing right here at home? Well, if you''re in Michigan, Governor Whitmer might just be on a whirlwind European tour, shaking hands and making deals for the good old Mitten State!
+DROP TABLE IF EXISTS "auth_group";
+CREATE TABLE "auth_group" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "name" varchar(150) NOT NULL UNIQUE);
+DROP TABLE IF EXISTS "auth_group_permissions";
+CREATE TABLE "auth_group_permissions" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "group_id" integer NOT NULL REFERENCES "auth_group" ("id") DEFERRABLE INITIALLY DEFERRED, "permission_id" integer NOT NULL REFERENCES "auth_permission" ("id") DEFERRABLE INITIALLY DEFERRED);
+DROP TABLE IF EXISTS "auth_permission";
+CREATE TABLE "auth_permission" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "content_type_id" integer NOT NULL REFERENCES "django_content_type" ("id") DEFERRABLE INITIALLY DEFERRED, "codename" varchar(100) NOT NULL, "name" varchar(255) NOT NULL);
+DROP TABLE IF EXISTS "django_admin_log";
+CREATE TABLE "django_admin_log" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "object_id" text NULL, "object_repr" varchar(200) NOT NULL, "action_flag" smallint unsigned NOT NULL CHECK ("action_flag" >= 0), "change_message" text NOT NULL, "content_type_id" integer NULL REFERENCES "django_content_type" ("id") DEFERRABLE INITIALLY DEFERRED, "user_id" bigint NOT NULL REFERENCES "participants_participant" ("id") DEFERRABLE INITIALLY DEFERRED, "action_time" datetime NOT NULL);
+DROP TABLE IF EXISTS "django_content_type";
+CREATE TABLE "django_content_type" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "app_label" varchar(100) NOT NULL, "model" varchar(100) NOT NULL);
+DROP TABLE IF EXISTS "django_migrations";
+CREATE TABLE "django_migrations" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "app" varchar(255) NOT NULL, "name" varchar(255) NOT NULL, "applied" datetime NOT NULL);
+DROP TABLE IF EXISTS "django_session";
+CREATE TABLE "django_session" ("session_key" varchar(40) NOT NULL PRIMARY KEY, "session_data" text NOT NULL, "expire_date" datetime NOT NULL);
+DROP TABLE IF EXISTS "participants_participant";
+CREATE TABLE "participants_participant" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "password" varchar(128) NOT NULL, "last_login" datetime NULL, "is_superuser" bool NOT NULL, "is_active" bool NOT NULL, "is_staff" bool NOT NULL, "steem_dollars" decimal NOT NULL, "steem_power" decimal NOT NULL, "date_joined" datetime NOT NULL, "participant_code" varchar(100) NOT NULL UNIQUE, "participant_image" varchar(200) NULL);
+DROP TABLE IF EXISTS "participants_participant_groups";
+CREATE TABLE "participants_participant_groups" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "participant_id" bigint NOT NULL REFERENCES "participants_participant" ("id") DEFERRABLE INITIALLY DEFERRED, "group_id" integer NOT NULL REFERENCES "auth_group" ("id") DEFERRABLE INITIALLY DEFERRED);
+DROP TABLE IF EXISTS "participants_participant_user_permissions";
+CREATE TABLE "participants_participant_user_permissions" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "participant_id" bigint NOT NULL REFERENCES "participants_participant" ("id") DEFERRABLE INITIALLY DEFERRED, "permission_id" integer NOT NULL REFERENCES "auth_permission" ("id") DEFERRABLE INITIALLY DEFERRED);
+DROP TABLE IF EXISTS "posts_comment";
+CREATE TABLE "posts_comment" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "author" varchar(75) NOT NULL, "permlink" varchar(255) NULL, "author_image" varchar(500) NOT NULL, "author_reputation" integer NOT NULL, "body" text NOT NULL, "date" datetime NOT NULL, "votes" integer NOT NULL, "payout" varchar(30) NOT NULL, "user_id" bigint NULL REFERENCES "participants_participant" ("id") DEFERRABLE INITIALLY DEFERRED, "post_id" bigint NOT NULL REFERENCES "posts_post" ("id") DEFERRABLE INITIALLY DEFERRED, "parent_id" bigint NULL REFERENCES "posts_comment" ("id") DEFERRABLE INITIALLY DEFERRED);
+DROP TABLE IF EXISTS "posts_post";
+CREATE TABLE "posts_post" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "author" varchar(75) NOT NULL, "permlink" varchar(255) NULL, "author_image" varchar(500) NOT NULL, "author_reputation" integer NOT NULL, "title" varchar(150) NOT NULL, "body" text NOT NULL, "body_preview" text NOT NULL, "image_url" varchar(200) NULL, "category" varchar(200) NOT NULL, "category_name" varchar(200) NOT NULL, "date" datetime NOT NULL, "votes" integer NOT NULL, "payout" varchar(30) NOT NULL, "user_id" bigint NULL REFERENCES "participants_participant" ("id") DEFERRABLE INITIALLY DEFERRED);
+DROP TABLE IF EXISTS "posts_vote";
+CREATE TABLE "posts_vote" ("id" integer NOT NULL PRIMARY KEY AUTOINCREMENT, "object_id" integer unsigned NOT NULL CHECK ("object_id" >= 0), "value" integer NOT NULL, "voted_at" datetime NOT NULL, "content_type_id" integer NOT NULL REFERENCES "django_content_type" ("id") DEFERRABLE INITIALLY DEFERRED, "user_id" bigint NOT NULL REFERENCES "participants_participant" ("id") DEFERRABLE INITIALLY DEFERRED);
+INSERT INTO "auth_permission" ("id","content_type_id","codename","name") VALUES (1,1,'add_post','Can add post'),
+ (2,1,'change_post','Can change post'),
+ (3,1,'delete_post','Can delete post'),
+ (4,1,'view_post','Can view post'),
+ (5,2,'add_comment','Can add comment'),
+ (6,2,'change_comment','Can change comment'),
+ (7,2,'delete_comment','Can delete comment'),
+ (8,2,'view_comment','Can view comment'),
+ (9,3,'add_vote','Can add vote'),
+ (10,3,'change_vote','Can change vote'),
+ (11,3,'delete_vote','Can delete vote'),
+ (12,3,'view_vote','Can view vote'),
+ (13,4,'add_participant','Can add participant'),
+ (14,4,'change_participant','Can change participant'),
+ (15,4,'delete_participant','Can delete participant'),
+ (16,4,'view_participant','Can view participant'),
+ (17,5,'add_logentry','Can add log entry'),
+ (18,5,'change_logentry','Can change log entry'),
+ (19,5,'delete_logentry','Can delete log entry'),
+ (20,5,'view_logentry','Can view log entry'),
+ (21,6,'add_permission','Can add permission'),
+ (22,6,'change_permission','Can change permission'),
+ (23,6,'delete_permission','Can delete permission'),
+ (24,6,'view_permission','Can view permission'),
+ (25,7,'add_group','Can add group'),
+ (26,7,'change_group','Can change group'),
+ (27,7,'delete_group','Can delete group'),
+ (28,7,'view_group','Can view group'),
+ (29,8,'add_contenttype','Can add content type'),
+ (30,8,'change_contenttype','Can change content type'),
+ (31,8,'delete_contenttype','Can delete content type'),
+ (32,8,'view_contenttype','Can view content type'),
+ (33,9,'add_session','Can add session'),
+ (34,9,'change_session','Can change session'),
+ (35,9,'delete_session','Can delete session'),
+ (36,9,'view_session','Can view session');
+INSERT INTO "django_admin_log" ("id","object_id","object_repr","action_flag","change_message","content_type_id","user_id","action_time") VALUES (1,'19','Michigan''s Global Hustle: Big G Goes European!',3,'',1,1,'2026-02-16 19:34:08.722260'),
+ (2,'18','Application for Steemit Challenge Season 30: Travel Videography Challenge',3,'',1,1,'2026-02-16 19:34:08.722305'),
+ (3,'17','The Diary Game || 04-02-26 ||  After working 8 hours on duty, I went to Gulistan Market in the afternoon to buy products.',3,'',1,1,'2026-02-16 19:34:08.722325'),
+ (4,'16','**Winter Wonderland Dates: Skip the Snow Day Snooze-Fest and Spark Some Joy!**',3,'',1,1,'2026-02-16 19:34:08.722340'),
+ (5,'15','Beauty of Oman - Visual story - Part 1',3,'',1,1,'2026-02-16 19:34:08.722355'),
+ (6,'14',' Where the Earth Breathes in Silence',3,'',1,1,'2026-02-16 19:34:08.722370'),
+ (7,'13','Winter forest',3,'',1,1,'2026-02-16 19:34:08.722384'),
+ (8,'12','Do you know Inari =/= Kennt ihr schon Inari? - Aizu Impressions 👹🍣🎎 Wonderful Japan ENG-GER',3,'',1,1,'2026-02-16 19:34:08.722397'),
+ (9,'11','Beauty of Oman - Visual Story - Part 2',3,'',1,1,'2026-02-16 19:34:08.722411'),
+ (10,'10','I witnessed The Commissioning Of The Omenuko Bridge by The Governor Of Abia State, Dr Alex Chioma Oti',3,'',1,1,'2026-02-16 19:34:08.722425'),
+ (11,'9',' A Field Where Community Comes Alive',3,'',1,1,'2026-02-16 19:34:08.722439'),
+ (12,'8','A Trip to Passport Office and Back Home',3,'',1,1,'2026-02-16 19:34:08.722453'),
+ (13,'7','Upcoming Events in Belfast: What’s Happening in the City',3,'',1,1,'2026-02-16 19:34:08.722467'),
+ (14,'6','Pupha Mahanatee Garden at Queen Sirikit Park, Bangkok',3,'',1,1,'2026-02-16 19:34:08.722482'),
+ (15,'5','Wonderful experience traveling on holiday with my friend',3,'',1,1,'2026-02-16 19:34:08.722496'),
+ (16,'4','Winter night sky',3,'',1,1,'2026-02-16 19:34:08.722509'),
+ (17,'3','Winter landscape',3,'',1,1,'2026-02-16 19:34:08.722523'),
+ (18,'2','All In One Travel Photography contest|| 2 steem power prize pool.||25',3,'',1,1,'2026-02-16 19:34:08.722536'),
+ (19,'1','Big Storm⛈️💨 Grid outage 🪫🔋',3,'',1,1,'2026-02-16 19:34:08.722549'),
+ (20,'168','unique opportunities for Australian players',3,'',1,1,'2026-02-16 20:04:00.167519'),
+ (21,'167','unique opportunities for Australian players',3,'',1,1,'2026-02-16 20:04:00.167552'),
+ (22,'166','The Audit is finally over',3,'',1,1,'2026-02-16 20:04:00.167566'),
+ (23,'165','Teddy bears are tender childhood companions.',3,'',1,1,'2026-02-16 20:04:00.167577'),
+ (24,'164','话要说给有回应的人听...',3,'',1,1,'2026-02-16 20:04:00.167589'),
+ (25,'163','A cruel picture of the neglect of skinny street dogs.',3,'',1,1,'2026-02-16 20:04:00.167601'),
+ (26,'162','An iron workshop',3,'',1,1,'2026-02-16 20:04:00.167611'),
+ (27,'161','Khichuri',3,'',1,1,'2026-02-16 20:04:00.167621'),
+ (28,'160','공원의자',3,'',1,1,'2026-02-16 20:04:00.167631'),
+ (29,'159','A big iron tower',3,'',1,1,'2026-02-16 20:04:00.167641'),
+ (30,'158','A sack of lentils',3,'',1,1,'2026-02-16 20:04:00.167650'),
+ (31,'157','The Heritage',3,'',1,1,'2026-02-16 20:04:00.167661'),
+ (32,'156','过年搞卫生洗蚊帐，忘...',3,'',1,1,'2026-02-16 20:04:00.167671'),
+ (33,'155','Drawing Strength from God – When He Is Your Source',3,'',1,1,'2026-02-16 20:04:00.167681'),
+ (34,'154','Ice Plant Flowers: A Chilly‑Cool Addition to Your Garden',3,'',1,1,'2026-02-16 20:04:00.167690'),
+ (35,'153','Mung dal',3,'',1,1,'2026-02-16 20:04:00.167700'),
+ (36,'152','A pharmacy shop',3,'',1,1,'2026-02-16 20:04:00.167709'),
+ (37,'151','A new market',3,'',1,1,'2026-02-16 20:04:00.167719'),
+ (38,'150','Standing Accountable for Your Decisions and Goals',3,'',1,1,'2026-02-16 20:04:00.167728'),
+ (39,'149','The Unstoppable Blaze: Why Every Gardener Needs Tithonia',3,'',1,1,'2026-02-16 20:04:00.167738'),
+ (40,'148','Weekend Study at Costa (2026-02-15)',3,'',1,1,'2026-02-16 20:04:00.167747'),
+ (41,'147','What Planning Steps Reduce Cracking in Outdoor Hardscapes?',3,'',1,1,'2026-02-16 20:04:00.167758'),
+ (42,'146','Experienced Interior Designer in Delhi NCR – Smart & Functional Spaces',3,'',1,1,'2026-02-16 20:04:00.167767'),
+ (43,'145','Sunflower is a symbol of beauty',3,'',1,1,'2026-02-16 20:04:00.167777'),
+ (44,'144','Day''s 8️⃣& 9️⃣Gold Coast Australia',3,'',1,1,'2026-02-16 20:04:00.167786'),
+ (45,'143','Adjustments become a habit',3,'',1,1,'2026-02-16 20:04:00.167796'),
+ (46,'142','10 years of expat life',3,'',1,1,'2026-02-16 20:04:00.167805'),
+ (47,'141','Saving Children from Predators',3,'',1,1,'2026-02-16 20:04:00.167815'),
+ (48,'140','How Daniel Guest Built Imagen Golf into a Leader in Modern Golf Instruction',3,'',1,1,'2026-02-16 20:04:00.167824'),
+ (49,'139','Jack Grealish',3,'',1,1,'2026-02-16 20:04:00.167834'),
+ (50,'138','Ball Sports Luggage Market Expansion Trends and Forecast to 2034',3,'',1,1,'2026-02-16 20:04:00.167844'),
+ (51,'137','Ice Cold Revenge: USA Delivers Historic 5-0 Silence to Canada at Milano Cortina',3,'',1,1,'2026-02-16 20:04:00.167853'),
+ (52,'136','Raheem Sterling has joined Dutch sign Feyenoord until the end of the season.',3,'',1,1,'2026-02-16 20:04:00.167862'),
+ (53,'135','Understanding NEW88 and the Role of new88thai',3,'',1,1,'2026-02-16 20:04:00.167872'),
+ (54,'134','The Scientific Formula: How Experts Quantify Sporting Difficulty.',3,'',1,1,'2026-02-16 20:04:00.167881'),
+ (55,'133','Started Well Ended Horribly👿 (Blood Strike)',3,'',1,1,'2026-02-16 20:04:00.167891'),
+ (56,'132','Frag Pro Shooter vol.4 ',3,'',1,1,'2026-02-16 20:04:00.167901'),
+ (57,'131','First Match in Frag Pro Shooter vol.4',3,'',1,1,'2026-02-16 20:04:00.167910'),
+ (58,'130','Ginga (FC MOBILE)',3,'',1,1,'2026-02-16 20:04:00.167919'),
+ (59,'129','Tied Shotgun 1VS 1 (CODM)',3,'',1,1,'2026-02-16 20:04:00.167929'),
+ (60,'128','Noob Battle Royale (CODM)',3,'',1,1,'2026-02-16 20:04:00.167939'),
+ (61,'127','My Daily Walking Stats February 10 2026',3,'',1,1,'2026-02-16 20:04:00.167949'),
+ (62,'126','My Daily Walking Stats February 11 2026',3,'',1,1,'2026-02-16 20:04:00.167959'),
+ (63,'125','Rise and Shine: Unleashing Your Inner Phoenix (Fitness Style!)',3,'',1,1,'2026-02-16 20:04:00.167968'),
+ (64,'124','The UFC heavyweight division is beyond repair',3,'',1,1,'2026-02-16 20:04:00.167978'),
+ (65,'123','My Daily Walking Stats February 12 2026',3,'',1,1,'2026-02-16 20:04:00.167988'),
+ (66,'122','The Super Bowl was a massive letdown this year',3,'',1,1,'2026-02-16 20:04:00.167998'),
+ (67,'121','Koda''s Guide to Pure Joy: Unleashing Your Inner Puppy!',3,'',1,1,'2026-02-16 20:04:00.168007'),
+ (68,'120','Referees eliminated',3,'',1,1,'2026-02-16 20:04:00.168016'),
+ (69,'119','What winter Olympic sports are you watching?',3,'',1,1,'2026-02-16 20:04:00.168025'),
+ (70,'118','My Daily Walking Stats February 13 2026',3,'',1,1,'2026-02-16 20:04:00.168035'),
+ (71,'117','Daily Grind or Daily Gainz? Can You REALLY Lift Every Single Day?',3,'',1,1,'2026-02-16 20:04:00.168044'),
+ (72,'116','My Daily Walking Stats February 14 2026',3,'',1,1,'2026-02-16 20:04:00.168055'),
+ (73,'115','Your Chase Sapphire Just Got a Workout Buddy (and a Discount!)',3,'',1,1,'2026-02-16 20:04:00.168065'),
+ (74,'114','ICC Men''s T20 World Cup 2026 - South Africa vs Afghanistan : A Magical Show!',3,'',1,1,'2026-02-16 20:04:00.168074'),
+ (75,'113','Get Ready for the Future: It''s Going to Be Quantum and Nano-tastic!',3,'',1,1,'2026-02-16 20:04:00.168083'),
+ (76,'112','Plot Twist! Pep''s Sweating Over Haaland Before the Arsenal Showdown!',3,'',1,1,'2026-02-16 20:04:00.168092'),
+ (77,'111','The popcorn are ready',3,'',1,1,'2026-02-16 20:04:00.168102'),
+ (78,'110','Still life in this old dog yet...',3,'',1,1,'2026-02-16 20:04:00.168111'),
+ (79,'109','When Rivalry Becomes One-Sided: India vs Pakistan in Modern Cricket',3,'',1,1,'2026-02-16 20:04:00.168120'),
+ (80,'108','Don''t call it shame, just call it Inter',3,'',1,1,'2026-02-16 20:04:00.168130'),
+ (81,'107','OWeekly CRICKET Review - CXVii | The T20 World Cup',3,'',1,1,'2026-02-16 20:04:00.168139'),
+ (82,'106','The Adorable Cunt',3,'',1,1,'2026-02-16 20:04:00.168148'),
+ (83,'105',' Brainy Fisherman',3,'',1,1,'2026-02-16 20:04:00.168157'),
+ (84,'104','A Colourful Bird',3,'',1,1,'2026-02-16 20:04:00.168166'),
+ (85,'103','Shishkino',3,'',1,1,'2026-02-16 20:04:00.168177'),
+ (86,'102','My Adorable Worm',3,'',1,1,'2026-02-16 20:04:00.168186'),
+ (87,'101','Their Yellow Jerk',3,'',1,1,'2026-02-16 20:04:00.168195'),
+ (88,'100',' Green Geek',3,'',1,1,'2026-02-16 20:04:00.168204'),
+ (89,'99','A Lucky Robin',3,'',1,1,'2026-02-16 20:04:00.168213'),
+ (90,'98','The Energetic Bird',3,'',1,1,'2026-02-16 20:04:00.168222'),
+ (91,'97','My Cute Robin',3,'',1,1,'2026-02-16 20:04:00.168231'),
+ (92,'96','His Troubled Hedgehog',3,'',1,1,'2026-02-16 20:04:00.168240'),
+ (93,'95',' A Quiet Story of Everyday Life',3,'',1,1,'2026-02-16 20:04:00.168250'),
+ (94,'94','Delicious Family Lunch',3,'',1,1,'2026-02-16 20:04:00.168259'),
+ (95,'93','Wenfeng · A Gathering in Silken Lights',3,'',1,1,'2026-02-16 20:04:00.168269'),
+ (96,'92','Terminal',3,'',1,1,'2026-02-16 20:04:00.168278'),
+ (97,'91','A View from the 42nd Floor of a Building in Kuala Lumpur',3,'',1,1,'2026-02-16 20:04:00.168288'),
+ (98,'90','Solo Travel is SO In: Why Everyone''s Hitting the Road Alone!',3,'',1,1,'2026-02-16 20:04:00.168297'),
+ (99,'89','Eurasian blue tit (Cyanistes caeruleus) #5',3,'',1,1,'2026-02-16 20:04:00.168306'),
+ (100,'88','The Serene Majesty of the Elbe River',3,'',1,1,'2026-02-16 20:04:00.168315'),
+ (101,'87','Wakehurst Botanical  gardens',3,'',1,1,'2026-02-16 20:04:00.168324'),
+ (102,'86','August Light at the Suzhou Museum',3,'',1,1,'2026-02-16 20:04:00.168334'),
+ (103,'85','Day 🔟Gold Coast Australia',3,'',1,1,'2026-02-16 20:04:00.168343'),
+ (104,'84','Our morning trip to buy quail birds',3,'',1,1,'2026-02-16 20:04:00.168353'),
+ (105,'83','Winter lake walk',3,'',1,1,'2026-02-16 20:04:00.168362'),
+ (106,'82','Where Gratitude Walks the Hills of Gombak',3,'',1,1,'2026-02-16 20:04:00.168371'),
+ (107,'81','✨ A Place Where Light Speaks – A Journey Through Sacred Architecture',3,'',1,1,'2026-02-16 20:04:00.168380'),
+ (108,'80','Let''s visit Oyama Shrine 尾山神社 👹🍣🎎 Wonderful Japan',3,'',1,1,'2026-02-16 20:04:00.168390'),
+ (109,'79','Get Ready to Groove! Barranquilla Crowned World''s Most Creative City!',3,'',1,1,'2026-02-16 20:04:00.168488'),
+ (110,'78','Eurasian blue tit (Cyanistes caeruleus) #4',3,'',1,1,'2026-02-16 20:04:00.168573'),
+ (111,'77','A wave come splashing your toes',3,'',1,1,'2026-02-16 20:04:00.168595'),
+ (112,'76','The Joyful Moment of Casting a Vote',3,'',1,1,'2026-02-16 20:04:00.168611'),
+ (113,'75','Exploring the Marble and Tiles market',3,'',1,1,'2026-02-16 20:04:00.168629'),
+ (114,'74','Winter forest',3,'',1,1,'2026-02-16 20:04:00.168645'),
+ (115,'73','Application for Steemit Challenge Season 30: Travel Videography Challenge',3,'',1,1,'2026-02-16 20:04:00.168662'),
+ (116,'72','The Diary Game || 04-02-26 ||  After working 8 hours on duty, I went to Gulistan Market in the afternoon to buy products.',3,'',1,1,'2026-02-16 20:04:00.168679'),
+ (117,'71','Delicious Chicken Jalfrezi',3,'',1,1,'2026-02-16 20:04:00.168695'),
+ (118,'70','Frozen Arepas - 10 February 2026',3,'',1,1,'2026-02-16 20:04:00.168711'),
+ (119,'69','Dahi – The Taste of Tradition and Health',3,'',1,1,'2026-02-16 20:04:00.168728'),
+ (120,'68','SLC29-W5 // "Boiled Chicken Recipes"',3,'',1,1,'2026-02-16 20:04:12.124710'),
+ (121,'67','Traditional Sweets & Cakes- 📣 ✨ THE BEST FOOD POST ✨ 📣WEEK #161',3,'',1,1,'2026-02-16 20:04:12.124747'),
+ (122,'66','Loose weight naturally',3,'',1,1,'2026-02-16 20:04:12.124772'),
+ (123,'65','Vegetable noodles',3,'',1,1,'2026-02-16 20:04:12.124780'),
+ (124,'64','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe.',3,'',1,1,'2026-02-16 20:04:12.124789'),
+ (125,'63','Oat pancake in a bit',3,'',1,1,'2026-02-16 20:04:12.124797'),
+ (126,'62','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe.',3,'',1,1,'2026-02-16 20:04:12.124805'),
+ (127,'61','SLC29-W5 // "Boiled Chicken Recipes"',3,'',1,1,'2026-02-16 20:04:12.124815'),
+ (128,'60','week #12 begins And Week #11 Winners 🏆🏆🏆 announcement Of the Delicious 😋 Food Highlights',3,'',1,1,'2026-02-16 20:04:12.124824'),
+ (129,'59','SLC29-W5 // "Boiled Chicken Recipes"',3,'',1,1,'2026-02-16 20:04:12.124832'),
+ (130,'58','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe',3,'',1,1,'2026-02-16 20:04:12.124840'),
+ (131,'57','Late Night Cravings: Listening Gently to Your Body at Night',3,'',1,1,'2026-02-16 20:04:12.124848'),
+ (132,'56','Daily Menu Delicacies Week No. 110 date (14-02-2026) // The name of your choice, (Try to be brief, we don''t want very long texts).',3,'',1,1,'2026-02-16 20:04:12.124856'),
+ (133,'55','SLC29-W5 | Fast Food Recipe : Chicken Jhalmuri Recipe.',3,'',1,1,'2026-02-16 20:04:12.124864'),
+ (134,'54','Application Steemit Challenge Season 30 || Traditional Steam Cooking',3,'',1,1,'2026-02-16 20:04:12.124872'),
+ (135,'53','Egg noodles',3,'',1,1,'2026-02-16 20:04:12.124881'),
+ (136,'52','Weekly contest|| Daily menu delicacies week of 109',3,'',1,1,'2026-02-16 20:04:12.124889'),
+ (137,'51','The Boat Noodle Odyssey: A Braised Pork Masterpiece!',3,'',1,1,'2026-02-16 20:04:12.124897'),
+ (138,'50','SLC29-W5 // "Boiled Chicken Recipes".',3,'',1,1,'2026-02-16 20:04:12.124905'),
+ (139,'49','Recipe of the day week#97 Left over rice|| making Caremal kheer|| Delicious desert at home',3,'',1,1,'2026-02-16 20:04:12.124913'),
+ (140,'48','Chicken Biryani Recipe.',3,'',1,1,'2026-02-16 20:04:12.124924'),
+ (141,'47','Allah''s gift is a storehouse of eggs."Zirabo"',3,'',1,1,'2026-02-16 20:04:12.124947'),
+ (142,'46','Daily Menu Delicacies Week No.109. date (11-02-2026) // (Tasty Delights from Morning to Night) 🤤🍽️',3,'',1,1,'2026-02-16 20:04:12.124958'),
+ (143,'45','Spicy fried chickpeas recipe',3,'',1,1,'2026-02-16 20:04:12.124966'),
+ (144,'44','Chicken and potato croquettes | chicken recipe slc29-w5',3,'',1,1,'2026-02-16 20:04:12.124974'),
+ (145,'43','Daily Menu Delicacies Week No.110. date (14-02-2026) // Yummy day with loved ones',3,'',1,1,'2026-02-16 20:04:12.124983'),
+ (146,'42','Steemit Challenge pitch season 30: Meals and Cultures of the World.',3,'',1,1,'2026-02-16 20:04:12.124991'),
+ (147,'41','"Recipe of the Day, Week No. 97: (Aromatic Bhindi Chicken Delight  )"',3,'',1,1,'2026-02-16 20:04:12.124999'),
+ (148,'40','My Foody Day at Home:  Coconut Rice and delicious Soup',3,'',1,1,'2026-02-16 20:04:12.125007'),
+ (149,'39','Tasty jalebi',3,'',1,1,'2026-02-16 20:04:12.125018'),
+ (150,'38','Boiled eggs and piyaju food',3,'',1,1,'2026-02-16 20:04:12.125031'),
+ (151,'37','SLC29-W6// "Chicken With Rice"',3,'',1,1,'2026-02-16 20:04:12.125053'),
+ (152,'36','**Winter Wonderland Dates: Skip the Snow Day Snooze-Fest and Spark Some Joy!**',3,'',1,1,'2026-02-16 20:04:12.125060'),
+ (153,'35','Beauty of Oman - Visual story - Part 1',3,'',1,1,'2026-02-16 20:04:12.125068'),
+ (154,'34',' Where the Earth Breathes in Silence',3,'',1,1,'2026-02-16 20:04:12.125076'),
+ (155,'33','Winter forest',3,'',1,1,'2026-02-16 20:04:12.125085'),
+ (156,'32','Do you know Inari =/= Kennt ihr schon Inari? - Aizu Impressions 👹🍣🎎 Wonderful Japan ENG-GER',3,'',1,1,'2026-02-16 20:04:12.125106'),
+ (157,'31','Beauty of Oman - Visual Story - Part 2',3,'',1,1,'2026-02-16 20:04:12.125114'),
+ (158,'30','I witnessed The Commissioning Of The Omenuko Bridge by The Governor Of Abia State, Dr Alex Chioma Oti',3,'',1,1,'2026-02-16 20:04:12.125126'),
+ (159,'29',' A Field Where Community Comes Alive',3,'',1,1,'2026-02-16 20:04:12.125134'),
+ (160,'28','A Trip to Passport Office and Back Home',3,'',1,1,'2026-02-16 20:04:12.125142'),
+ (161,'27','Upcoming Events in Belfast: What’s Happening in the City',3,'',1,1,'2026-02-16 20:04:12.125153'),
+ (162,'26','Pupha Mahanatee Garden at Queen Sirikit Park, Bangkok',3,'',1,1,'2026-02-16 20:04:12.125170'),
+ (163,'25','Wonderful experience traveling on holiday with my friend',3,'',1,1,'2026-02-16 20:04:12.125178'),
+ (164,'24','Winter night sky',3,'',1,1,'2026-02-16 20:04:12.125185'),
+ (165,'23','Michigan''s Global Hustle: Big G Goes European!',3,'',1,1,'2026-02-16 20:04:12.125193'),
+ (166,'22','Winter landscape',3,'',1,1,'2026-02-16 20:04:12.125200'),
+ (167,'21','All In One Travel Photography contest|| 2 steem power prize pool.||25',3,'',1,1,'2026-02-16 20:04:12.125208'),
+ (168,'20','Big Storm⛈️💨 Grid outage 🪫🔋',3,'',1,1,'2026-02-16 20:04:12.125218'),
+ (169,'345','MAYBE THIS TOO?...',3,'',2,1,'2026-02-18 06:51:54.953739'),
+ (170,'344','WILL THIS WORK?...',3,'',2,1,'2026-02-18 06:51:54.953769'),
+ (171,'343','Dangit...',3,'',2,1,'2026-02-18 06:51:54.953782'),
+ (172,'342','This did not work... or maybe it did?...',3,'',2,1,'2026-02-18 06:51:54.953791'),
+ (173,'341','Test...',3,'',2,1,'2026-02-18 06:51:54.953801');
+INSERT INTO "django_content_type" ("id","app_label","model") VALUES (1,'posts','post'),
+ (2,'posts','comment'),
+ (3,'posts','vote'),
+ (4,'participants','participant'),
+ (5,'admin','logentry'),
+ (6,'auth','permission'),
+ (7,'auth','group'),
+ (8,'contenttypes','contenttype'),
+ (9,'sessions','session');
+INSERT INTO "django_migrations" ("id","app","name","applied") VALUES (1,'contenttypes','0001_initial','2026-02-16 13:46:06.891510'),
+ (2,'contenttypes','0002_remove_content_type_name','2026-02-16 13:46:06.899987'),
+ (3,'auth','0001_initial','2026-02-16 13:46:06.912460'),
+ (4,'auth','0002_alter_permission_name_max_length','2026-02-16 13:46:06.920528'),
+ (5,'auth','0003_alter_user_email_max_length','2026-02-16 13:46:06.926026'),
+ (6,'auth','0004_alter_user_username_opts','2026-02-16 13:46:06.932977'),
+ (7,'auth','0005_alter_user_last_login_null','2026-02-16 13:46:06.938429'),
+ (8,'auth','0006_require_contenttypes_0002','2026-02-16 13:46:06.941541'),
+ (9,'auth','0007_alter_validators_add_error_messages','2026-02-16 13:46:06.947269'),
+ (10,'auth','0008_alter_user_username_max_length','2026-02-16 13:46:06.953152'),
+ (11,'auth','0009_alter_user_last_name_max_length','2026-02-16 13:46:06.958583'),
+ (12,'auth','0010_alter_group_name_max_length','2026-02-16 13:46:06.967155'),
+ (13,'auth','0011_update_proxy_permissions','2026-02-16 13:46:06.972391'),
+ (14,'auth','0012_alter_user_first_name_max_length','2026-02-16 13:46:06.978909'),
+ (15,'participants','0001_initial','2026-02-16 13:46:06.990544'),
+ (16,'admin','0001_initial','2026-02-16 13:46:07.001949'),
+ (17,'admin','0002_logentry_remove_auto_add','2026-02-16 13:46:07.013282'),
+ (18,'admin','0003_logentry_add_action_flag_choices','2026-02-16 13:46:07.021212'),
+ (19,'participants','0002_rename_steemit_dollars_participant_steem_dollars_and_more','2026-02-16 13:46:07.042803'),
+ (20,'participants','0003_remove_participant_is_npc','2026-02-16 13:46:07.054338'),
+ (21,'participants','0004_participant_date_joined','2026-02-16 13:46:07.067698'),
+ (22,'participants','0005_alter_participant_participant_code','2026-02-16 13:46:07.078684'),
+ (23,'posts','0001_initial','2026-02-16 13:46:07.103310'),
+ (24,'sessions','0001_initial','2026-02-16 13:46:07.112255'),
+ (25,'posts','0002_comment_parent','2026-02-16 13:53:07.185534'),
+ (26,'participants','0006_participant_participant_image','2026-02-17 21:13:38.515552');
+INSERT INTO "django_session" ("session_key","session_data","expire_date") VALUES ('n51xohxcwgcfu5r6b9ppw44sq45f29n5','.eJxVjMsOwiAQRf-FtSE8p-DSvd9AmAGkaiAp7cr479qkC93ec859sRC3tYZt5CXMiZ2ZZKffDSM9cttBusd265x6W5cZ-a7wgw5-7Sk_L4f7d1DjqN_agtAW0SvATAImKsKoUqSURmsCsqqglZ4AyUWXvNJEZAQp4cDmCdj7A9cwN5Y:1vrywo:3zsMnsYZqdf-cqbTsmwurbtMzce7FeykIhEDKELqRhQ','2026-03-02 13:47:34.548691');
+INSERT INTO "participants_participant" ("id","password","last_login","is_superuser","is_active","is_staff","steem_dollars","steem_power","date_joined","participant_code","participant_image") VALUES (1,'pbkdf2_sha256$1000000$Oegxk175GMfKnFYN0uJQix$ocSvRwiM4eSnIpHMTrFmjeFeS7bEBdT74TUrs/V0/zE=','2026-02-16 13:47:34.542964',1,1,1,0,0,'2026-02-16 13:47:02.099426','baylor_admin','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128');
+INSERT INTO "posts_comment" ("id","author","permlink","author_image","author_reputation","body","date","votes","payout","user_id","post_id","parent_id") VALUES (338,'fuli','20260213t085018750z','https://cdn.steemitimages.com/DQmRM2xQTzdHki2KpjskUgYuqty3J9gvq5JuNvsuXn3Yt8u/Screen%20Shot%202020-03-26%20at%2010.35.57%20AM.jpg',65,'Thank you for sharing on steem! I''m witness fuli, and I''ve given you a free upvote. If you''d like to support me, please consider voting at https://steemitwallet.com/~witnesses 🌟','2026-02-13 14:50:21',0,'$0.00',NULL,183,NULL),
+ (339,'anzare084','tacbk0','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'nice','2026-02-12 15:55:15',0,'$0.00',NULL,184,NULL),
+ (340,'starrykay','tak97j','https://cdn.steemitimages.com/DQmeDLwypMuHfMhxzHiHAkYj642jNoLyoJSFw4DHgN1M13e/IMG_0699.png',35,'It feels like you were talking right to me, I’m on a journey!','2026-02-16 22:45:21',0,'$0.00',NULL,196,NULL);
+INSERT INTO "posts_post" ("id","author","permlink","author_image","author_reputation","title","body","body_preview","image_url","category","category_name","date","votes","payout","user_id") VALUES (169,'live.log','michigans-global-hustle-big-g-goes-european-1771261784','https://cdn.steemitimages.com/DQmaJzZcFNFEgDkT2bVJgHNc4yABkzNVhvw94TngcK3Yk5x/Screenshot_20191115-123022_Instagram.jpg',71,'Michigan''s Global Hustle: Big G Goes European!','Ever wonder what your state governor does when they''re not, you know, governing right here at home? Well, if you''re in Michigan, Governor Whitmer might just be on a whirlwind European tour, shaking hands and making deals for the good old Mitten State!
 
 [SOURCE](https://www.detroitnews.com/gcdn/authoring/authoring-images/2026/02/09/PDTN/88593221007-20260209-dmme-reading-money-1064.jpg?crop=2105,1184,x0,y615&width=2105&height=1184&format=pjpg&auto=webp)
 
@@ -391,8 +286,8 @@ Then it was off to Munich, Germany, for something a bit more serious: the Munich
 
 So, what''s the big takeaway from this international adventure? Michigan isn''t just sitting pretty by the Great Lakes. We''re out there, making friends, making deals, and making sure our state stays strong and grows. It''s all about bringing home the bacon (or the pasta, in Italy''s case!) for Michigan families and ensuring a bright, prosperous future. Go, Michigan, go!
 
-[Original Article](https://www.detroitnews.com/story/news/politics/2026/02/16/michigan-gretchen-whitmer-italy-trade-mission-munich-germany-ukraine/88701545007/)','Ever wonder what your state governor does when they''re not, you know, governing right here at home? Well, if you''re in Michigan, Governor Whitmer might just be on a whirlwind European tour, shaking hands and making deals for the good old Mitten State! SOURCE Think of it like this: she''s basically Michigan''s super-salesperson, showing off all the cool stuff we make and the awesome talent we have. Her mission? To pump up Michigan''s economy, snag some sweet new investments, boost our exports, and create more jobs for folks like us. We''re talking about everything from advanced manufacturing (hello, cars!) to','','travel','#travel','2026-02-16 23:09:45',151,'$60.40',NULL);
-INSERT INTO "posts_post" VALUES (170,'tangmo','pupha-mahanatee-garden-at-queen-sirikit-park-bangkok','https://steemitimages.com/0x0/https://steemitimages.com/DQmZMuq9dhJDYfeshw6aCNhbGHF4QTe23UFcp6u2QETMfje/flower3006.jpg',73,'Pupha Mahanatee Garden at Queen Sirikit Park, Bangkok','![https://i.postimg.cc/85cQLYqN/Pupha-Mahanatee-Garden18.jpg](https://i.postimg.cc/85cQLYqN/Pupha-Mahanatee-Garden18.jpg)
+[Original Article](https://www.detroitnews.com/story/news/politics/2026/02/16/michigan-gretchen-whitmer-italy-trade-mission-munich-germany-ukraine/88701545007/)','Ever wonder what your state governor does when they''re not, you know, governing right here at home? Well, if you''re in Michigan, Governor Whitmer might just be on a whirlwind European tour, shaking hands and making deals for the good old Mitten State! SOURCE Think of it like this: she''s basically Michigan''s super-salesperson, showing off all the cool stuff we make and the awesome talent we have. Her mission? To pump up Michigan''s economy, snag some sweet new investments, boost our exports, and create more jobs for folks like us. We''re talking about everything from advanced manufacturing (hello, cars!) to','','travel','#travel','2026-02-16 23:09:45',151,'$60.40',NULL),
+ (170,'tangmo','pupha-mahanatee-garden-at-queen-sirikit-park-bangkok','https://steemitimages.com/0x0/https://steemitimages.com/DQmZMuq9dhJDYfeshw6aCNhbGHF4QTe23UFcp6u2QETMfje/flower3006.jpg',73,'Pupha Mahanatee Garden at Queen Sirikit Park, Bangkok','![https://i.postimg.cc/85cQLYqN/Pupha-Mahanatee-Garden18.jpg](https://i.postimg.cc/85cQLYqN/Pupha-Mahanatee-Garden18.jpg)
 
 Queen Sirikit Park has a very large area which is divided into many sections.  One of the interesting sections is “Pupha Mahanatee Garden”.  (Pupha means mountain or hill, Mahanatee means river or lake or pond)  
 
@@ -466,8 +361,8 @@ The garden with the tall buildings in the far distance as a background creates a
 
 ![https://i.postimg.cc/bwTDVGFF/Pupha-Mahanatee-Garden32.jpg](https://i.postimg.cc/bwTDVGFF/Pupha-Mahanatee-Garden32.jpg)
 
-The atmosphere at the Pupha Mahanatee Garden is nice and serene.  It’s special for nature lovers, especially me.','Queen Sirikit Park has a very large area which is divided into many sections. One of the interesting sections is “Pupha Mahanatee Garden”. (Pupha means mountain or hill, Mahanatee means river or lake or pond) Pupha Mahanatee Garden provides a beautiful landscape with a relaxing spot for walking, jogging or admiring gorgeous flowers with various species. Besides, the whole area of the Pupha Mahanatee Garden is refreshing with wonderful ponds, stunning huge stones and attractive fountains. https://www.youtube.com/shorts/8vbg_jw6yzM The garden with the tall buildings in the far distance as a background creates a picturesque view as well. The atmosphere at the','https://steemitimages.com/640x0/https://i.postimg.cc/85cQLYqN/Pupha-Mahanatee-Garden18.jpg','nature','#nature','2026-02-15 17:00:39',18,'$7.20',NULL);
-INSERT INTO "posts_post" VALUES (171,'maxinpower','do-you-know-inari-kennt-ihr-schon-inari-aizu-impressions-wonderful-japan-eng-ger','https://cdn.steemitimages.com/DQme4mY4h69sYTifx8yJUBssAawL51XAZ4mByXZ8EucsgES/063sensouji%20(5).jpg',74,'Do you know Inari =/= Kennt ihr schon Inari? - Aizu Impressions 👹🍣🎎 Wonderful Japan ENG-GER','![IMG_3094.JPG](https://files.peakd.com/file/peakd-hive/maxinpower/23tbwZHuQ77ZMHD3yvkwVJGN3omaxw2d73TXhhCaiFS87eQS5w4buxmUAHnbcM7srLTHa.JPG)
+The atmosphere at the Pupha Mahanatee Garden is nice and serene.  It’s special for nature lovers, especially me.','Queen Sirikit Park has a very large area which is divided into many sections. One of the interesting sections is “Pupha Mahanatee Garden”. (Pupha means mountain or hill, Mahanatee means river or lake or pond) Pupha Mahanatee Garden provides a beautiful landscape with a relaxing spot for walking, jogging or admiring gorgeous flowers with various species. Besides, the whole area of the Pupha Mahanatee Garden is refreshing with wonderful ponds, stunning huge stones and attractive fountains. https://www.youtube.com/shorts/8vbg_jw6yzM The garden with the tall buildings in the far distance as a background creates a picturesque view as well. The atmosphere at the','https://steemitimages.com/640x0/https://i.postimg.cc/85cQLYqN/Pupha-Mahanatee-Garden18.jpg','nature','#nature','2026-02-15 17:00:39',18,'$7.20',NULL),
+ (171,'maxinpower','do-you-know-inari-kennt-ihr-schon-inari-aizu-impressions-wonderful-japan-eng-ger','https://cdn.steemitimages.com/DQme4mY4h69sYTifx8yJUBssAawL51XAZ4mByXZ8EucsgES/063sensouji%20(5).jpg',74,'Do you know Inari =/= Kennt ihr schon Inari? - Aizu Impressions 👹🍣🎎 Wonderful Japan ENG-GER','![IMG_3094.JPG](https://files.peakd.com/file/peakd-hive/maxinpower/23tbwZHuQ77ZMHD3yvkwVJGN3omaxw2d73TXhhCaiFS87eQS5w4buxmUAHnbcM7srLTHa.JPG)
 </b>
 
 
@@ -498,8 +393,8 @@ An Inari‑Schreinen stehen immer zwei Fuchsfiguren, die gemeinsam als heilige B
 Ich bin schon an vielen Inari-Schreinen vorbeigekommen, und irgendwie ziehen sie mich auch immer wieder an. Und auch in Zukunft werde ich wohl des Öfteren an solchen Orten stoppen und mit Sicherheit auch ein paar Fotos machen. Dieses gibt es dann vielleicht in einen weiteren Beitrag hier zu sehen...
 
 
-![blog-ende.png](https://files.peakd.com/file/peakd-hive/maxinpower/23tv6H18WKn98nBVkn2MwVhwWsuFRFgjBGwxLEMVhRZD7zRRbFokaNiAn39fUaB3TxVX6.png)','Once again, I look back on one of our recent trips, and once again we are in the Aizu region. Every time we visit, we go to Tsuruga Castle, where we walk a long round through the castle grounds. Although we have been here many times before, there is always something new to discover, and some details attract me again each time. For example, there is as small shrine that stands directly on the castle wall, and which is guarded by two stone figures. These are two statues depicting the Japanese deity Inari Ōkami, who represents rice, fertility, and prosperity','https://files.peakd.com/file/peakd-hive/maxinpower/23tbwZHuQ77ZMHD3yvkwVJGN3omaxw2d73TXhhCaiFS87eQS5w4buxmUAHnbcM7srLTHa.JPG','hive-161179','Steem Japan','2026-02-16 12:45:03',29,'$11.60',NULL);
-INSERT INTO "posts_post" VALUES (172,'evildeathcore','slobodischa','https://pp.userapi.com/c310416/v310416366/bd5/qTQIEs9PyAs.jpg',72,'Slobodischa','The village of Slobodischa is located in the Gryazovetsky district of the Vologda region. A car is so rare here that I woke up the locals. Two men were waiting for me with headlamps, and then they were surprised when I said I was just taking pictures.
+![blog-ende.png](https://files.peakd.com/file/peakd-hive/maxinpower/23tv6H18WKn98nBVkn2MwVhwWsuFRFgjBGwxLEMVhRZD7zRRbFokaNiAn39fUaB3TxVX6.png)','Once again, I look back on one of our recent trips, and once again we are in the Aizu region. Every time we visit, we go to Tsuruga Castle, where we walk a long round through the castle grounds. Although we have been here many times before, there is always something new to discover, and some details attract me again each time. For example, there is as small shrine that stands directly on the castle wall, and which is guarded by two stone figures. These are two statues depicting the Japanese deity Inari Ōkami, who represents rice, fertility, and prosperity','https://files.peakd.com/file/peakd-hive/maxinpower/23tbwZHuQ77ZMHD3yvkwVJGN3omaxw2d73TXhhCaiFS87eQS5w4buxmUAHnbcM7srLTHa.JPG','hive-161179','Steem Japan','2026-02-16 12:45:03',29,'$11.60',NULL),
+ (172,'evildeathcore','slobodischa','https://pp.userapi.com/c310416/v310416366/bd5/qTQIEs9PyAs.jpg',72,'Slobodischa','The village of Slobodischa is located in the Gryazovetsky district of the Vologda region. A car is so rare here that I woke up the locals. Two men were waiting for me with headlamps, and then they were surprised when I said I was just taking pictures.
 ![image.png](https://i.imgur.com/abdSOLP.jpeg)
 
 They have every car in the account. Although I would have "given myself away" without a car: the crunch from the snow was such that you could probably hear it from a kilometer away.
@@ -535,8 +430,8 @@ I''m sure it''s even more atmospheric here in summer.
 Although the village seems dead at night.
 ![image.png](https://i.imgur.com/NEe81nc.jpeg)
 
-Only the lanterns and the light in the windows remind us that someone else lives here.','The village of Slobodischa is located in the Gryazovetsky district of the Vologda region. A car is so rare here that I woke up the locals. Two men were waiting for me with headlamps, and then they were surprised when I said I was just taking pictures. They have every car in the account. Although I would have "given myself away" without a car: the crunch from the snow was such that you could probably hear it from a kilometer away. In fact, they are so vigilant here because of the fugitive criminals from the nearby Gryazovets prison. They say','https://i.imgur.com/abdSOLP.jpeg','hive-109690','CCS','2026-02-17 16:17:57',48,'$19.20',NULL);
-INSERT INTO "posts_post" VALUES (173,'kgakakillerg','a-day-out-in-the-city-of-london-covent-garden-big-ben-buckingham-palace-white-hall-and-more-october-2025-part-19','https://cdn.steemitimages.com/DQmRSVqBGbG8KnfEmttjfMfWagRPNh6r1rCxK8hZgweC13u/InShot_20180824_112053760.jpg',76,'A Day Out In The City Of London Covent garden Big Ben Buckingham Palace White Hall And More October 2025 part 19','![kgakakillerg original content](https://img.blurt.world/blurtimage/kgakakillerg/557829fc270f15807c50bb54386cfc36d0f87ba5.jpg)
+Only the lanterns and the light in the windows remind us that someone else lives here.','The village of Slobodischa is located in the Gryazovetsky district of the Vologda region. A car is so rare here that I woke up the locals. Two men were waiting for me with headlamps, and then they were surprised when I said I was just taking pictures. They have every car in the account. Although I would have "given myself away" without a car: the crunch from the snow was such that you could probably hear it from a kilometer away. In fact, they are so vigilant here because of the fugitive criminals from the nearby Gryazovets prison. They say','https://i.imgur.com/abdSOLP.jpeg','hive-109690','CCS','2026-02-17 16:17:57',48,'$19.20',NULL),
+ (173,'kgakakillerg','a-day-out-in-the-city-of-london-covent-garden-big-ben-buckingham-palace-white-hall-and-more-october-2025-part-19','https://cdn.steemitimages.com/DQmRSVqBGbG8KnfEmttjfMfWagRPNh6r1rCxK8hZgweC13u/InShot_20180824_112053760.jpg',76,'A Day Out In The City Of London Covent garden Big Ben Buckingham Palace White Hall And More October 2025 part 19','![kgakakillerg original content](https://img.blurt.world/blurtimage/kgakakillerg/557829fc270f15807c50bb54386cfc36d0f87ba5.jpg)
 
 
 Hello friend''s family followers stars good morning good afternoon good evening where ever you around the world 🌍 🌍 🌍 🌍 🌍 🌍 🌍 
@@ -625,9 +520,9 @@ If you did like this post why not check out my other posts like this
 
 Like comment share follow me on Instagram and X twitter and subscribe to my YouTube channel @kgakakillerg 
 
-💯 Original content feel free to message me on Instagram where we can speak freely in private ✌🏾👊🏾🌍🌍🌍🌍🙏🏾','Hello friend''s family followers stars good morning good afternoon good evening where ever you around the world 🌍 🌍 🌍 🌍 🌍 🌍 🌍 Here''s some beautiful photos I captured back in October 2025 whilst we were showing some family around London We had such a great time and we went to so many different places I hope you enjoy all the photos I''ve shared in this part but if you missed out on any of the previous parts check them out whenever you get a chance Missed the last part A Day Out In The City Of London Covent','https://img.blurt.world/blurtimage/kgakakillerg/557829fc270f15807c50bb54386cfc36d0f87ba5.jpg','hive-188972','Traveling Steem','2026-02-17 13:03:42',8,'$3.20',NULL);
-INSERT INTO "posts_post" VALUES (174,'purediamondtours','history-and-culture-of-south-africa','https://cdn.steemitimages.com/DQmaiz66CUaXcsLJvvV57HMaJP4m1dznqTyyf6V6nhKXh9i/123.png',35,'History and Culture of South Africa','Experience South Africa''s vibrant history and culture at Lesedi Cultural Village with Pure Diamond Tours. Immerse yourself in diverse traditions with guided tours. Book now for an unforgettable cultural adventure or visit us at our website https://purediamondtours.com/tour/lesedi-cultural-village/ to get in touch with us!','Experience South Africa''s vibrant history and culture at Lesedi Cultural Village with Pure Diamond Tours. Immerse yourself in diverse traditions with guided tours. Book now for an unforgettable cultural adventure or visit us at our website https://purediamondtours.com/tour/lesedi-cultural-village/ to get in touch with us!','','safari','#safari','2026-02-17 19:13:33',1,'$0.40',NULL);
-INSERT INTO "posts_post" VALUES (175,'pookamanii','book-cheap-flights-in-nigeria-the-complete-2025-guide','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'Book Cheap Flights in Nigeria: The Complete 2025 Guide','# Book Cheap Flights in Nigeria: The Complete 2025 Guide
+💯 Original content feel free to message me on Instagram where we can speak freely in private ✌🏾👊🏾🌍🌍🌍🌍🙏🏾','Hello friend''s family followers stars good morning good afternoon good evening where ever you around the world 🌍 🌍 🌍 🌍 🌍 🌍 🌍 Here''s some beautiful photos I captured back in October 2025 whilst we were showing some family around London We had such a great time and we went to so many different places I hope you enjoy all the photos I''ve shared in this part but if you missed out on any of the previous parts check them out whenever you get a chance Missed the last part A Day Out In The City Of London Covent','https://img.blurt.world/blurtimage/kgakakillerg/557829fc270f15807c50bb54386cfc36d0f87ba5.jpg','hive-188972','Traveling Steem','2026-02-17 13:03:42',8,'$3.20',NULL),
+ (174,'purediamondtours','history-and-culture-of-south-africa','https://cdn.steemitimages.com/DQmaiz66CUaXcsLJvvV57HMaJP4m1dznqTyyf6V6nhKXh9i/123.png',35,'History and Culture of South Africa','Experience South Africa''s vibrant history and culture at Lesedi Cultural Village with Pure Diamond Tours. Immerse yourself in diverse traditions with guided tours. Book now for an unforgettable cultural adventure or visit us at our website https://purediamondtours.com/tour/lesedi-cultural-village/ to get in touch with us!','Experience South Africa''s vibrant history and culture at Lesedi Cultural Village with Pure Diamond Tours. Immerse yourself in diverse traditions with guided tours. Book now for an unforgettable cultural adventure or visit us at our website https://purediamondtours.com/tour/lesedi-cultural-village/ to get in touch with us!','','safari','#safari','2026-02-17 19:13:33',1,'$0.40',NULL),
+ (175,'pookamanii','book-cheap-flights-in-nigeria-the-complete-2025-guide','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'Book Cheap Flights in Nigeria: The Complete 2025 Guide','# Book Cheap Flights in Nigeria: The Complete 2025 Guide
 
 Whether you''re flying from Lagos to Abuja for business, heading home to Port Harcourt for the holidays, or planning an international trip, finding an affordable ticket can feel overwhelming. Fares fluctuate constantly, airlines have different pricing structures, and knowing *when* and *where* to book makes all the difference.
 
@@ -822,8 +717,8 @@ As Nigeria''s aviation sector continues to evolve — with Air Peace expanding i
 
 ---
 
-*All fares mentioned in this article are estimates based on publicly available industry data. Prices are subject to change. Always verify current fares on your preferred airline or booking platform before purchasing.*','Book Cheap Flights in Nigeria: The Complete 2025 Guide Whether you''re flying from Lagos to Abuja for business, heading home to Port Harcourt for the holidays, or planning an international trip, finding an affordable ticket can feel overwhelming. Fares fluctuate constantly, airlines have different pricing structures, and knowing when and where to book makes all the difference. This guide breaks down everything you need to know to book cheap flights in Nigeria — covering domestic routes, international options, the best booking platforms, fare tips, and the airlines currently operating in the country. Understanding Nigeria''s Aviation Landscape Nigeria has one of','','cryptopay','#cryptopay','2026-02-17 10:20:06',3,'$1.20',NULL);
-INSERT INTO "posts_post" VALUES (176,'live.log','get-ready-to-groove-barranquilla-crowned-worlds-most-creative-city-1771015571','https://cdn.steemitimages.com/DQmaJzZcFNFEgDkT2bVJgHNc4yABkzNVhvw94TngcK3Yk5x/Screenshot_20191115-123022_Instagram.jpg',71,'Get Ready to Groove! Barranquilla Crowned World''s Most Creative City!','Guess what, culture lovers and adventure seekers? We''ve got some *seriously* exciting news from the sun-drenched shores of Colombia! If you haven''t heard, Barranquilla, the vibrant heart of the Colombian Caribbean, just snatched a HUGE title: **"World''s Best Creative Destination"** by The Global Creative Destination Awards! Talk about a mic drop!
+*All fares mentioned in this article are estimates based on publicly available industry data. Prices are subject to change. Always verify current fares on your preferred airline or booking platform before purchasing.*','Book Cheap Flights in Nigeria: The Complete 2025 Guide Whether you''re flying from Lagos to Abuja for business, heading home to Port Harcourt for the holidays, or planning an international trip, finding an affordable ticket can feel overwhelming. Fares fluctuate constantly, airlines have different pricing structures, and knowing when and where to book makes all the difference. This guide breaks down everything you need to know to book cheap flights in Nigeria — covering domestic routes, international options, the best booking platforms, fare tips, and the airlines currently operating in the country. Understanding Nigeria''s Aviation Landscape Nigeria has one of','','cryptopay','#cryptopay','2026-02-17 10:20:06',3,'$1.20',NULL),
+ (176,'live.log','get-ready-to-groove-barranquilla-crowned-worlds-most-creative-city-1771015571','https://cdn.steemitimages.com/DQmaJzZcFNFEgDkT2bVJgHNc4yABkzNVhvw94TngcK3Yk5x/Screenshot_20191115-123022_Instagram.jpg',71,'Get Ready to Groove! Barranquilla Crowned World''s Most Creative City!','Guess what, culture lovers and adventure seekers? We''ve got some *seriously* exciting news from the sun-drenched shores of Colombia! If you haven''t heard, Barranquilla, the vibrant heart of the Colombian Caribbean, just snatched a HUGE title: **"World''s Best Creative Destination"** by The Global Creative Destination Awards! Talk about a mic drop!
 
 Now, you might be thinking, "Creative Destination? What does that even mean?" Well, my friends, in Barranquilla, creativity isn''t just a buzzword; it''s the very heartbeat of the city! It''s in the rhythm of their music, the swirl of their dances, the colors of their art, and the boundless energy of their people. This city isn''t just thinking outside the box; it''s dancing around it, painting it neon, and inviting everyone to join the party!
 
@@ -838,8 +733,8 @@ This award isn''t just a fancy plaque; it''s a shout-out to Barranquilla''s dedi
 So, if you''re looking for a destination that will spark your imagination, make your feet tap, and fill your soul with vibrant energy, Barranquilla should be at the very top of your list. Go experience the magic for yourself – you won''t regret it!
 
 ---
-Original article inspiration: [https://colombiaone.com/2026/02/13/barranquilla-world-best-creative-destination/](https://colombiaone.com/2026/02/13/barranquilla-world-best-creative-destination/)','Guess what, culture lovers and adventure seekers? We''ve got some seriously exciting news from the sun-drenched shores of Colombia! If you haven''t heard, Barranquilla, the vibrant heart of the Colombian Caribbean, just snatched a HUGE title: "World''s Best Creative Destination" by The Global Creative Destination Awards! Talk about a mic drop! Now, you might be thinking, "Creative Destination? What does that even mean?" Well, my friends, in Barranquilla, creativity isn''t just a buzzword; it''s the very heartbeat of the city! It''s in the rhythm of their music, the swirl of their dances, the colors of their art, and the boundless','','travel','#travel','2026-02-14 02:46:12',152,'$60.80',NULL);
-INSERT INTO "posts_post" VALUES (177,'maxinpower','let-s-visit-oyama-shrine-wonderful-japan','https://cdn.steemitimages.com/DQme4mY4h69sYTifx8yJUBssAawL51XAZ4mByXZ8EucsgES/063sensouji%20(5).jpg',74,'Let''s visit Oyama Shrine 尾山神社 👹🍣🎎 Wonderful Japan','![IMG_4694.JPG](https://files.peakd.com/file/peakd-hive/maxinpower/Eou9CMGBCWNa31a7eC1Wj3GryN9ohTKyws1M8ftExD3MdGdeuz1so2cV1D1jUGYudTD.JPG)
+Original article inspiration: [https://colombiaone.com/2026/02/13/barranquilla-world-best-creative-destination/](https://colombiaone.com/2026/02/13/barranquilla-world-best-creative-destination/)','Guess what, culture lovers and adventure seekers? We''ve got some seriously exciting news from the sun-drenched shores of Colombia! If you haven''t heard, Barranquilla, the vibrant heart of the Colombian Caribbean, just snatched a HUGE title: "World''s Best Creative Destination" by The Global Creative Destination Awards! Talk about a mic drop! Now, you might be thinking, "Creative Destination? What does that even mean?" Well, my friends, in Barranquilla, creativity isn''t just a buzzword; it''s the very heartbeat of the city! It''s in the rhythm of their music, the swirl of their dances, the colors of their art, and the boundless','','travel','#travel','2026-02-14 02:46:12',152,'$60.80',NULL),
+ (177,'maxinpower','let-s-visit-oyama-shrine-wonderful-japan','https://cdn.steemitimages.com/DQme4mY4h69sYTifx8yJUBssAawL51XAZ4mByXZ8EucsgES/063sensouji%20(5).jpg',74,'Let''s visit Oyama Shrine 尾山神社 👹🍣🎎 Wonderful Japan','![IMG_4694.JPG](https://files.peakd.com/file/peakd-hive/maxinpower/Eou9CMGBCWNa31a7eC1Wj3GryN9ohTKyws1M8ftExD3MdGdeuz1so2cV1D1jUGYudTD.JPG)
 </b>
 
 There are many reasons to stay a little longer in Japan. One is the food, which I have already reported on many times here, and another is the country''s impressive variety of landscapes. From expansive coastlines to majestic mountains to endless forests and vast rice fields, each season has its own unique charm. And last but not least, there are the numerous temples and shrines that can be found in every corner of the country.
@@ -901,11 +796,11 @@ And that concludes our brief tour of Oyama Shrine. Directly behind is the site o
 ![IMG_6703.JPG](https://files.peakd.com/file/peakd-hive/maxinpower/Eqqvs7oRZGM5iHvwygTbz4jMFxztjEAyFttsXGaExV4dh1jnVYHny7erQg2fw2gLaKd.JPG)
 
 
-![blog-ende.png](https://files.peakd.com/file/peakd-hive/maxinpower/23tv6H18WKn98nBVkn2MwVhwWsuFRFgjBGwxLEMVhRZD7zRRbFokaNiAn39fUaB3TxVX6.png)','There are many reasons to stay a little longer in Japan. One is the food, which I have already reported on many times here, and another is the country''s impressive variety of landscapes. From expansive coastlines to majestic mountains to endless forests and vast rice fields, each season has its own unique charm. And last but not least, there are the numerous temples and shrines that can be found in every corner of the country. And it is precisely these spiritual places that I find particularly appealing. Even though I am not religious myself, I cannot escape the quiet, almost','https://files.peakd.com/file/peakd-hive/maxinpower/Eou9CMGBCWNa31a7eC1Wj3GryN9ohTKyws1M8ftExD3MdGdeuz1so2cV1D1jUGYudTD.JPG','hive-161179','Steem Japan','2026-02-14 14:28:00',25,'$10.00',NULL);
-INSERT INTO "posts_post" VALUES (178,'ultravioletmag','wakehurst-botanical-gardens','https://scontent-lht6-1.xx.fbcdn.net/v/t1.0-9/53001561_615247032249805_3599940393782738944_o.jpg?_nc_cat=102&_nc_ht=scontent-lht6-1.xx&oh=50d43805b56956ae69841e3374b06416&oe=5CDCABB7',73,'Wakehurst Botanical  gardens','Join me on a tour around the beautiful wakehurst gardens. This place is absolutely huge, making this perhaps my longest video ever! 
+![blog-ende.png](https://files.peakd.com/file/peakd-hive/maxinpower/23tv6H18WKn98nBVkn2MwVhwWsuFRFgjBGwxLEMVhRZD7zRRbFokaNiAn39fUaB3TxVX6.png)','There are many reasons to stay a little longer in Japan. One is the food, which I have already reported on many times here, and another is the country''s impressive variety of landscapes. From expansive coastlines to majestic mountains to endless forests and vast rice fields, each season has its own unique charm. And last but not least, there are the numerous temples and shrines that can be found in every corner of the country. And it is precisely these spiritual places that I find particularly appealing. Even though I am not religious myself, I cannot escape the quiet, almost','https://files.peakd.com/file/peakd-hive/maxinpower/Eou9CMGBCWNa31a7eC1Wj3GryN9ohTKyws1M8ftExD3MdGdeuz1so2cV1D1jUGYudTD.JPG','hive-161179','Steem Japan','2026-02-14 14:28:00',25,'$10.00',NULL),
+ (178,'ultravioletmag','wakehurst-botanical-gardens','https://scontent-lht6-1.xx.fbcdn.net/v/t1.0-9/53001561_615247032249805_3599940393782738944_o.jpg?_nc_cat=102&_nc_ht=scontent-lht6-1.xx&oh=50d43805b56956ae69841e3374b06416&oe=5CDCABB7',73,'Wakehurst Botanical  gardens','Join me on a tour around the beautiful wakehurst gardens. This place is absolutely huge, making this perhaps my longest video ever! 
 
-[Video](https://youtu.be/7jU63cUjDic?si=YLKIQmAIgo_ACAT8)','Join me on a tour around the beautiful wakehurst gardens. This place is absolutely huge, making this perhaps my longest video ever! https://youtu.be/7jU63cUjDic?si=YLKIQmAIgo_ACAT8','https://img.youtube.com/vi/7jU63cUjDic/0.jpg','hive-109690','CCS','2026-02-13 17:44:42',69,'$27.60',NULL);
-INSERT INTO "posts_post" VALUES (179,'vik24','supercharge-your-day-the-morning-routine-you-actually-need-1771313607','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Supercharge Your Day: The Morning Routine You *Actually* Need!','Ever feel like your mornings are a blurry race against the clock, ending with you feeling more like a zombie than a superhero? You''re not alone! We all want to feel energized, focused, and ready to tackle whatever the day throws our way. But how do you go from snooze-button regret to "bring it on!"?
+[Video](https://youtu.be/7jU63cUjDic?si=YLKIQmAIgo_ACAT8)','Join me on a tour around the beautiful wakehurst gardens. This place is absolutely huge, making this perhaps my longest video ever! https://youtu.be/7jU63cUjDic?si=YLKIQmAIgo_ACAT8','https://img.youtube.com/vi/7jU63cUjDic/0.jpg','hive-109690','CCS','2026-02-13 17:44:42',69,'$27.60',NULL),
+ (179,'vik24','supercharge-your-day-the-morning-routine-you-actually-need-1771313607','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Supercharge Your Day: The Morning Routine You *Actually* Need!','Ever feel like your mornings are a blurry race against the clock, ending with you feeling more like a zombie than a superhero? You''re not alone! We all want to feel energized, focused, and ready to tackle whatever the day throws our way. But how do you go from snooze-button regret to "bring it on!"?
 
 Turns out, there''s a little science magic we can use to hack our mornings and set ourselves up for an epic day. Ditch the old habits, because I''m breaking down the ultimate morning routine that your brain and body will seriously thank you for.
 
@@ -943,8 +838,8 @@ Before the day truly begins, take 5-10 minutes for yourself. This could be journ
 
 So there you have it! This isn''t about being perfect; it''s about making small, intentional changes that can have a massive impact on your energy, mood, and productivity. Pick one or two things to start with, experiment, and see how much better your days can become! Your future awesome self will thank you.
 
-Inspired by: [The Science-Backed Morning Routine (The BEST Way to Start Your Day)](https://www.youtube.com/watch?v=vioeY1hrJqE)','Ever feel like your mornings are a blurry race against the clock, ending with you feeling more like a zombie than a superhero? You''re not alone! We all want to feel energized, focused, and ready to tackle whatever the day throws our way. But how do you go from snooze-button regret to "bring it on!"? Turns out, there''s a little science magic we can use to hack our mornings and set ourselves up for an epic day. Ditch the old habits, because I''m breaking down the ultimate morning routine that your brain and body will seriously thank you for. 1.','','sport','#sport','2026-02-17 13:33:27',157,'$62.80',NULL);
-INSERT INTO "posts_post" VALUES (180,'vik24','plot-twist-peps-sweating-over-haaland-before-the-arsenal-showdown-1771162626','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Plot Twist! Pep''s Sweating Over Haaland Before the Arsenal Showdown!','Alright, football fanatics, gather ''round! The Premier League title race is heating up faster than a forgotten hot dog on the grill, and guess what? We''ve got ourselves a major plot twist brewing in Manchester!
+Inspired by: [The Science-Backed Morning Routine (The BEST Way to Start Your Day)](https://www.youtube.com/watch?v=vioeY1hrJqE)','Ever feel like your mornings are a blurry race against the clock, ending with you feeling more like a zombie than a superhero? You''re not alone! We all want to feel energized, focused, and ready to tackle whatever the day throws our way. But how do you go from snooze-button regret to "bring it on!"? Turns out, there''s a little science magic we can use to hack our mornings and set ourselves up for an epic day. Ditch the old habits, because I''m breaking down the ultimate morning routine that your brain and body will seriously thank you for. 1.','','sport','#sport','2026-02-17 13:33:27',157,'$62.80',NULL),
+ (180,'vik24','plot-twist-peps-sweating-over-haaland-before-the-arsenal-showdown-1771162626','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Plot Twist! Pep''s Sweating Over Haaland Before the Arsenal Showdown!','Alright, football fanatics, gather ''round! The Premier League title race is heating up faster than a forgotten hot dog on the grill, and guess what? We''ve got ourselves a major plot twist brewing in Manchester!
 
 Imagine this: The biggest game of the season is just around the corner, Man City vs. Arsenal, a true winner-takes-all (or at least, winner-takes-a-massive-advantage) kind of match. The tension is thicker than a triple-chocolate milkshake, and then, *BAM!* Enter Pep Guardiola, looking a little… well, *sweaty*.
 
@@ -961,8 +856,8 @@ Of course, City''s squad is packed with superstars, and they''re hardly a one-ma
 So, as we count down to the colossal clash, keep your eyes peeled for any updates on Haaland. This little fitness drama has just added a whole new layer of spice to what was already a mouth-watering encounter. Will Pep''s sweat turn into tears, or will Haaland miraculously find his stride? Only time will tell, but one thing''s for sure: the title race just got even more unpredictable!
 
 ---
-Inspired by: [Little boost for Arsenal? Pep Guardiola reveals Man City sweating over Erling Haaland fitness](https://www.goal.com/en-us/lists/little-boost-arsenal-pep-guardiola-reveals-man-city-sweating-erling-haaland-fitness/blt590b541edc5ef460)','Alright, football fanatics, gather ''round! The Premier League title race is heating up faster than a forgotten hot dog on the grill, and guess what? We''ve got ourselves a major plot twist brewing in Manchester! Imagine this: The biggest game of the season is just around the corner, Man City vs. Arsenal, a true winner-takes-all (or at least, winner-takes-a-massive-advantage) kind of match. The tension is thicker than a triple-chocolate milkshake, and then, BAM! Enter Pep Guardiola, looking a little… well, sweaty . No, he hasn''t just finished a marathon! Our beloved City boss has reportedly been "sweating" over the fitness','','sport','#sport','2026-02-15 19:37:06',149,'$59.60',NULL);
-INSERT INTO "posts_post" VALUES (181,'rtonline','my-daily-walking-stats-february-16-2026','https://i.hizliresim.com/YOvDNE.jpg',69,'My Daily Walking Stats February 16 2026','![](https://images.ecency.com/DQmNbydjg3qx77zaXXQrfuWnWkYKTHkcALcpuWgUbp2ovdr/1602.png)
+Inspired by: [Little boost for Arsenal? Pep Guardiola reveals Man City sweating over Erling Haaland fitness](https://www.goal.com/en-us/lists/little-boost-arsenal-pep-guardiola-reveals-man-city-sweating-erling-haaland-fitness/blt590b541edc5ef460)','Alright, football fanatics, gather ''round! The Premier League title race is heating up faster than a forgotten hot dog on the grill, and guess what? We''ve got ourselves a major plot twist brewing in Manchester! Imagine this: The biggest game of the season is just around the corner, Man City vs. Arsenal, a true winner-takes-all (or at least, winner-takes-a-massive-advantage) kind of match. The tension is thicker than a triple-chocolate milkshake, and then, BAM! Enter Pep Guardiola, looking a little… well, sweaty . No, he hasn''t just finished a marathon! Our beloved City boss has reportedly been "sweating" over the fitness','','sport','#sport','2026-02-15 19:37:06',149,'$59.60',NULL),
+ (181,'rtonline','my-daily-walking-stats-february-16-2026','https://i.hizliresim.com/YOvDNE.jpg',69,'My Daily Walking Stats February 16 2026','![](https://images.ecency.com/DQmNbydjg3qx77zaXXQrfuWnWkYKTHkcALcpuWgUbp2ovdr/1602.png)
 
 Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early this morning, the weather was clear and beautiful, and most surprisingly, it was 24 degrees Celsius in February – it''s truly unbelievable. It felt like summer had arrived, but around here, this kind of weather at this time of year is called a false spring. I went for a long walk today, but I sweated a lot, so I came home early. In this kind of weather, we can catch a cold from sweating so much. Even exceeding 8K was amazing.
 
@@ -972,8 +867,8 @@ According to Google Fit, I walked 8975 steps, 6.22 km, and burned 2603 Cal. Take
 
 Stay healthy and with love!
 Thank you for reading
-@rtonline','Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early this morning, the weather was clear and beautiful, and most surprisingly, it was 24 degrees Celsius in February – it''s truly unbelievable. It felt like summer had arrived, but around here, this kind of weather at this time of year is called a false spring. I went for a long walk today, but I sweated a lot, so I came home early. In this kind of weather, we can catch a cold from sweating so much. Even exceeding','https://images.ecency.com/DQmNbydjg3qx77zaXXQrfuWnWkYKTHkcALcpuWgUbp2ovdr/1602.png','activity','#activity','2026-02-17 02:14:24',13,'$5.20',NULL);
-INSERT INTO "posts_post" VALUES (182,'vik24','get-ready-for-the-future-its-going-to-be-quantum-and-nanotastic-1771067467','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Get Ready for the Future: It''s Going to Be Quantum and Nano-tastic!','Ever feel like the future is just around the corner, waiting for us to catch up? Well, buckle up, buttercups, because the National Science Foundation (NSF) is hitting the accelerator, and they''re doing it with some seriously tiny tech! We''re talking about a future powered by quantum leaps and nanotechnology, and trust me, it’s way cooler than it sounds.
+@rtonline','Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early this morning, the weather was clear and beautiful, and most surprisingly, it was 24 degrees Celsius in February – it''s truly unbelievable. It felt like summer had arrived, but around here, this kind of weather at this time of year is called a false spring. I went for a long walk today, but I sweated a lot, so I came home early. In this kind of weather, we can catch a cold from sweating so much. Even exceeding','https://images.ecency.com/DQmNbydjg3qx77zaXXQrfuWnWkYKTHkcALcpuWgUbp2ovdr/1602.png','activity','#activity','2026-02-17 02:14:24',13,'$5.20',NULL),
+ (182,'vik24','get-ready-for-the-future-its-going-to-be-quantum-and-nanotastic-1771067467','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Get Ready for the Future: It''s Going to Be Quantum and Nano-tastic!','Ever feel like the future is just around the corner, waiting for us to catch up? Well, buckle up, buttercups, because the National Science Foundation (NSF) is hitting the accelerator, and they''re doing it with some seriously tiny tech! We''re talking about a future powered by quantum leaps and nanotechnology, and trust me, it’s way cooler than it sounds.
 
 Think of it like this: Imagine having LEGOs so small, you can build with individual atoms. Or unlocking secret superpowers hidden within the very fabric of reality. That’s kind of what quantum and nanotechnology are all about! They''re not just buzzwords; they’re the keys to unlocking breakthroughs that will change everything from how we get our energy to how we treat diseases.
 
@@ -990,8 +885,8 @@ Big universities and research hubs are already circling their calendars, because
 So, while the scientists are busy building the future, we can all get excited about the quantum-powered, nano-infused world that’s heading our way. It''s going to be smaller, smarter, and seriously spectacular!
 
 ---
-*Inspired by: [https://www.lawbc.com/nsf-will-establish-national-quantum-and-nanotechnology-research-infrastructure-letters-of-intent-are-due-march-16-2026/](https://www.lawbc.com/nsf-will-establish-national-quantum-and-nanotechnology-research-infrastructure-letters-of-intent-are-due-march-16-2026/)*','Ever feel like the future is just around the corner, waiting for us to catch up? Well, buckle up, buttercups, because the National Science Foundation (NSF) is hitting the accelerator, and they''re doing it with some seriously tiny tech! We''re talking about a future powered by quantum leaps and nanotechnology, and trust me, it’s way cooler than it sounds. Think of it like this: Imagine having LEGOs so small, you can build with individual atoms. Or unlocking secret superpowers hidden within the very fabric of reality. That’s kind of what quantum and nanotechnology are all about! They''re not just buzzwords;','','sport','#sport','2026-02-14 17:11:06',149,'$59.60',NULL);
-INSERT INTO "posts_post" VALUES (183,'vik24','your-chase-sapphire-just-got-a-workout-buddy-and-a-discount-1770972313','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Your Chase Sapphire Just Got a Workout Buddy (and a Discount!)','Hey fitness fanatics and savvy savers! Ever wonder if your credit card could do more than just rack up points for that dream vacation? What if it could also help you get in shape *and* save you some serious dough? Well, buckle up, buttercups, because Chase Sapphire is doing just that!
+*Inspired by: [https://www.lawbc.com/nsf-will-establish-national-quantum-and-nanotechnology-research-infrastructure-letters-of-intent-are-due-march-16-2026/](https://www.lawbc.com/nsf-will-establish-national-quantum-and-nanotechnology-research-infrastructure-letters-of-intent-are-due-march-16-2026/)*','Ever feel like the future is just around the corner, waiting for us to catch up? Well, buckle up, buttercups, because the National Science Foundation (NSF) is hitting the accelerator, and they''re doing it with some seriously tiny tech! We''re talking about a future powered by quantum leaps and nanotechnology, and trust me, it’s way cooler than it sounds. Think of it like this: Imagine having LEGOs so small, you can build with individual atoms. Or unlocking secret superpowers hidden within the very fabric of reality. That’s kind of what quantum and nanotechnology are all about! They''re not just buzzwords;','','sport','#sport','2026-02-14 17:11:06',149,'$59.60',NULL),
+ (183,'vik24','your-chase-sapphire-just-got-a-workout-buddy-and-a-discount-1770972313','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Your Chase Sapphire Just Got a Workout Buddy (and a Discount!)','Hey fitness fanatics and savvy savers! Ever wonder if your credit card could do more than just rack up points for that dream vacation? What if it could also help you get in shape *and* save you some serious dough? Well, buckle up, buttercups, because Chase Sapphire is doing just that!
 
 We''re talking about **WHOOP**, the super-smart wearable that’s basically a tiny, all-knowing health guru strapped to your wrist. Forget just counting steps; WHOOP dives deep into your sleep, recovery, and daily strain, giving you personalized insights to optimize your well-being. It''s like having a crystal ball for your body!
 
@@ -1010,8 +905,8 @@ So, if you''ve been eyeing a WHOOP or are an existing member looking to renew, d
 
 ---
 **Original Article Inspiration:**
-[https://thriftytraveler.com/news/credit-card/chase-sapphire-whoop-offer/](https://thriftytraveler.com/news/credit-card/chase-sapphire-whoop-offer/)','Hey fitness fanatics and savvy savers! Ever wonder if your credit card could do more than just rack up points for that dream vacation? What if it could also help you get in shape and save you some serious dough? Well, buckle up, buttercups, because Chase Sapphire is doing just that! We''re talking about WHOOP , the super-smart wearable that’s basically a tiny, all-knowing health guru strapped to your wrist. Forget just counting steps; WHOOP dives deep into your sleep, recovery, and daily strain, giving you personalized insights to optimize your well-being. It''s like having a crystal ball for your','','sport','#sport','2026-02-13 14:45:12',153,'$61.20',NULL);
-INSERT INTO "posts_post" VALUES (184,'vik24','daily-grind-or-daily-gainz-can-you-really-lift-every-single-day-1770877249','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Daily Grind or Daily Gainz? Can You REALLY Lift Every Single Day?','Alright, fitness fanatics and couch potatoes alike, gather ''round! We''ve all seen that one gym rat who practically lives under the squat rack, right? Or maybe you''ve had that thought cross your mind: "If I lifted *every single day*, I''d be shredded in no time!" Sounds tempting, doesn''t it? But is it actually a smart move, or a one-way ticket to Snap City?
+[https://thriftytraveler.com/news/credit-card/chase-sapphire-whoop-offer/](https://thriftytraveler.com/news/credit-card/chase-sapphire-whoop-offer/)','Hey fitness fanatics and savvy savers! Ever wonder if your credit card could do more than just rack up points for that dream vacation? What if it could also help you get in shape and save you some serious dough? Well, buckle up, buttercups, because Chase Sapphire is doing just that! We''re talking about WHOOP , the super-smart wearable that’s basically a tiny, all-knowing health guru strapped to your wrist. Forget just counting steps; WHOOP dives deep into your sleep, recovery, and daily strain, giving you personalized insights to optimize your well-being. It''s like having a crystal ball for your','','sport','#sport','2026-02-13 14:45:12',153,'$61.20',NULL),
+ (184,'vik24','daily-grind-or-daily-gainz-can-you-really-lift-every-single-day-1770877249','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Daily Grind or Daily Gainz? Can You REALLY Lift Every Single Day?','Alright, fitness fanatics and couch potatoes alike, gather ''round! We''ve all seen that one gym rat who practically lives under the squat rack, right? Or maybe you''ve had that thought cross your mind: "If I lifted *every single day*, I''d be shredded in no time!" Sounds tempting, doesn''t it? But is it actually a smart move, or a one-way ticket to Snap City?
 
 Let''s cut to the chase, because I know your time is precious (especially if you''re planning your next workout!). The answer, according to the wise sages of strength, is a resounding… **YES! You *can* lift every day. BUT – and this is a huge, capital letters, flashing neon sign BUT – it’s all about how you play the game.**
 
@@ -1033,8 +928,8 @@ Think of it like a smart chef planning their menu. They don''t make a Michelin-s
 Ultimately, lifting every day isn''t about proving how tough you are. It''s about consistency, smart programming, and building a sustainable routine that makes you feel strong, energized, and ready to tackle whatever life throws at you. So go ahead, chase those daily gains – just make sure you''re doing it the smart way!
 
 ---
-Inspired by: [Men''s Health - Lifting Every Day](https://www.menshealth.com/fitness/a70314195/weight-lifting-everyday-strong-talk-mens-health/)','Alright, fitness fanatics and couch potatoes alike, gather ''round! We''ve all seen that one gym rat who practically lives under the squat rack, right? Or maybe you''ve had that thought cross your mind: "If I lifted every single day , I''d be shredded in no time!" Sounds tempting, doesn''t it? But is it actually a smart move, or a one-way ticket to Snap City? Let''s cut to the chase, because I know your time is precious (especially if you''re planning your next workout!). The answer, according to the wise sages of strength, is a resounding… YES! You can lift every','','sport','#sport','2026-02-12 12:20:51',158,'$63.20',NULL);
-INSERT INTO "posts_post" VALUES (185,'sports.guy55','the-ufc-heavyweight-division-is-beyond-repair','https://cdn.steemitimages.com/DQmSyyruEuV2iRtLHkxm9K4cdzVQtoUPmZ53HHrEssQuYxh/images%20(1).jpg',78,'The UFC heavyweight division is beyond repair','It''s hard to imagine that it wasn''t even that long ago that the heavyweight division was one of, if the not most, sought after division in UFC or perhaps even MMA as a whole.  The idea of juggernauts that weight 220 lbs (100kg) or more getting in a ring for a scrap with almost no holds barred is something that brings about a level of excitement that the little guys simply cannot bring out.  I remember really dreading the flyweight and lightweight categories as we made our way to the "big guys" but now it is the other way around.
+Inspired by: [Men''s Health - Lifting Every Day](https://www.menshealth.com/fitness/a70314195/weight-lifting-everyday-strong-talk-mens-health/)','Alright, fitness fanatics and couch potatoes alike, gather ''round! We''ve all seen that one gym rat who practically lives under the squat rack, right? Or maybe you''ve had that thought cross your mind: "If I lifted every single day , I''d be shredded in no time!" Sounds tempting, doesn''t it? But is it actually a smart move, or a one-way ticket to Snap City? Let''s cut to the chase, because I know your time is precious (especially if you''re planning your next workout!). The answer, according to the wise sages of strength, is a resounding… YES! You can lift every','','sport','#sport','2026-02-12 12:20:51',158,'$63.20',NULL),
+ (185,'sports.guy55','the-ufc-heavyweight-division-is-beyond-repair','https://cdn.steemitimages.com/DQmSyyruEuV2iRtLHkxm9K4cdzVQtoUPmZ53HHrEssQuYxh/images%20(1).jpg',78,'The UFC heavyweight division is beyond repair','It''s hard to imagine that it wasn''t even that long ago that the heavyweight division was one of, if the not most, sought after division in UFC or perhaps even MMA as a whole.  The idea of juggernauts that weight 220 lbs (100kg) or more getting in a ring for a scrap with almost no holds barred is something that brings about a level of excitement that the little guys simply cannot bring out.  I remember really dreading the flyweight and lightweight categories as we made our way to the "big guys" but now it is the other way around.
 
 <center markdown="block">
 https://www.worldmmaawards.com/wp-content/uploads/2023/06/brock-lesnar.jpg
@@ -1076,8 +971,8 @@ I get that nobody wants to get caught with a tree-trunk sized arm catching them 
 
 At this point in time I really feel as though the best thing that UFC could do for the heavyweight division is to take a play from the film "Aliens."  Take off, nuke it from orbit...it''s the only way to be sure.   
 
-Let''s stop thinking that we can tweak this division back out from obscurity.  We can''t.  It is too far broken to repair.  Nobody cares about anyone in this division and even if you did manage to bring back Jon Jones for a fight the people would care for just that one fight and then go back to groaning whenever there was a heavyweight fight on the card.  It really shouldn''t be that way.','It''s hard to imagine that it wasn''t even that long ago that the heavyweight division was one of, if the not most, sought after division in UFC or perhaps even MMA as a whole. The idea of juggernauts that weight 220 lbs (100kg) or more getting in a ring for a scrap with almost no holds barred is something that brings about a level of excitement that the little guys simply cannot bring out. I remember really dreading the flyweight and lightweight categories as we made our way to the "big guys" but now it is the other way around.','https://steemitimages.com/640x0/https://www.worldmmaawards.com/wp-content/uploads/2023/06/brock-lesnar.jpg','sports','#sports','2026-02-11 10:29:06',33,'$13.20',NULL);
-INSERT INTO "posts_post" VALUES (186,'sports.guy55','what-winter-olympic-sports-are-you-watching','https://cdn.steemitimages.com/DQmSyyruEuV2iRtLHkxm9K4cdzVQtoUPmZ53HHrEssQuYxh/images%20(1).jpg',78,'What winter Olympic sports are you watching?','I''ve never been one to get all that excited about the Olympics.   To me they are one of those things that if it is on I will turn to the channel every now and then and see what is going on, but I don''t really know much about the various games and I certainly don''t plan my day around what event is going to be on.   
+Let''s stop thinking that we can tweak this division back out from obscurity.  We can''t.  It is too far broken to repair.  Nobody cares about anyone in this division and even if you did manage to bring back Jon Jones for a fight the people would care for just that one fight and then go back to groaning whenever there was a heavyweight fight on the card.  It really shouldn''t be that way.','It''s hard to imagine that it wasn''t even that long ago that the heavyweight division was one of, if the not most, sought after division in UFC or perhaps even MMA as a whole. The idea of juggernauts that weight 220 lbs (100kg) or more getting in a ring for a scrap with almost no holds barred is something that brings about a level of excitement that the little guys simply cannot bring out. I remember really dreading the flyweight and lightweight categories as we made our way to the "big guys" but now it is the other way around.','https://steemitimages.com/640x0/https://www.worldmmaawards.com/wp-content/uploads/2023/06/brock-lesnar.jpg','sports','#sports','2026-02-11 10:29:06',33,'$13.20',NULL),
+ (186,'sports.guy55','what-winter-olympic-sports-are-you-watching','https://cdn.steemitimages.com/DQmSyyruEuV2iRtLHkxm9K4cdzVQtoUPmZ53HHrEssQuYxh/images%20(1).jpg',78,'What winter Olympic sports are you watching?','I''ve never been one to get all that excited about the Olympics.   To me they are one of those things that if it is on I will turn to the channel every now and then and see what is going on, but I don''t really know much about the various games and I certainly don''t plan my day around what event is going to be on.   
 
 Normally, when I do find something that I am interested in it is just because it happens to be on at the time and I don''t really know enough about it to really get too committed to any of it. 
 
@@ -1112,8 +1007,8 @@ If I see a snowboarding event is on I will search for something else to watch or
 
 They will never take these events out though because there is too much money to be made with sponsorship.   
 
-Well that is two events I love and 1 that I could do without? You have anything to add?','I''ve never been one to get all that excited about the Olympics. To me they are one of those things that if it is on I will turn to the channel every now and then and see what is going on, but I don''t really know much about the various games and I certainly don''t plan my day around what event is going to be on. Normally, when I do find something that I am interested in it is just because it happens to be on at the time and I don''t really know enough about it to really get','https://steemitimages.com/640x0/https://www.rollingstone.com/wp-content/uploads/2026/02/GettyImages-2259436736.jpg','sports','#sports','2026-02-14 12:17:15',7,'$2.80',NULL);
-INSERT INTO "posts_post" VALUES (187,'vik24','kodas-guide-to-pure-joy-unleashing-your-inner-puppy-1770782101','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Koda''s Guide to Pure Joy: Unleashing Your Inner Puppy!','Ever watch a dog and just wish you had their zest for life? You know, that boundless energy, that pure, unadulterated happiness over... well, anything? I''ve been getting my daily dose of inspiration lately from an absolute legend named Koda, and let me tell you, this pup has life figured out!
+Well that is two events I love and 1 that I could do without? You have anything to add?','I''ve never been one to get all that excited about the Olympics. To me they are one of those things that if it is on I will turn to the channel every now and then and see what is going on, but I don''t really know much about the various games and I certainly don''t plan my day around what event is going to be on. Normally, when I do find something that I am interested in it is just because it happens to be on at the time and I don''t really know enough about it to really get','https://steemitimages.com/640x0/https://www.rollingstone.com/wp-content/uploads/2026/02/GettyImages-2259436736.jpg','sports','#sports','2026-02-14 12:17:15',7,'$2.80',NULL),
+ (187,'vik24','kodas-guide-to-pure-joy-unleashing-your-inner-puppy-1770782101','https://cdn.steemitimages.com/DQmanG6gohhLy4EfAv1k8eZc2n4nQ57fSrdjx3hYpmRRMME/IMG-20210515-WA0012.jpg',70,'Koda''s Guide to Pure Joy: Unleashing Your Inner Puppy!','Ever watch a dog and just wish you had their zest for life? You know, that boundless energy, that pure, unadulterated happiness over... well, anything? I''ve been getting my daily dose of inspiration lately from an absolute legend named Koda, and let me tell you, this pup has life figured out!
 
 Koda''s daily routine looks something like this: WAKE UP! EXPLORE! SNIFF EVERYTHING! DIG A HOLE (or two)! RUN LIKE THE WIND! Repeat. It''s truly a masterclass in living in the moment. Forget your to-do lists and your worries for a sec; Koda reminds us that sometimes, the best thing you can do is just *go*.
 
@@ -1123,8 +1018,8 @@ Seriously, when was the last time you dug a hole with such enthusiasm? Or ran th
 
 So, next time you feel a bit bogged down, take a page from Koda''s book. Find your own personal "field" (even if it''s just a park bench or a quiet room), sniff out something interesting (a good book, a new hobby), and maybe, just maybe, unleash your inner Koda for a bit. You might be surprised how much joy you find!
 
-Original Article: [https://www.instagram.com/p/DUl7TGFEhOu/](https://www.instagram.com/p/DUl7TGFEhOu/)','Ever watch a dog and just wish you had their zest for life? You know, that boundless energy, that pure, unadulterated happiness over... well, anything? I''ve been getting my daily dose of inspiration lately from an absolute legend named Koda, and let me tell you, this pup has life figured out! Koda''s daily routine looks something like this: WAKE UP! EXPLORE! SNIFF EVERYTHING! DIG A HOLE (or two)! RUN LIKE THE WIND! Repeat. It''s truly a masterclass in living in the moment. Forget your to-do lists and your worries for a sec; Koda reminds us that sometimes, the best thing','','sport','#sport','2026-02-11 09:55:03',153,'$61.20',NULL);
-INSERT INTO "posts_post" VALUES (188,'rtonline','my-daily-walking-stats-february-11-2026','https://i.hizliresim.com/YOvDNE.jpg',69,'My Daily Walking Stats February 11 2026','![](https://images.ecency.com/DQmRD4ejYQWUPQL7fQEUCSqLqJaeKcU5UAwS7n8Rjk9yZcc/11022.jpg)
+Original Article: [https://www.instagram.com/p/DUl7TGFEhOu/](https://www.instagram.com/p/DUl7TGFEhOu/)','Ever watch a dog and just wish you had their zest for life? You know, that boundless energy, that pure, unadulterated happiness over... well, anything? I''ve been getting my daily dose of inspiration lately from an absolute legend named Koda, and let me tell you, this pup has life figured out! Koda''s daily routine looks something like this: WAKE UP! EXPLORE! SNIFF EVERYTHING! DIG A HOLE (or two)! RUN LIKE THE WIND! Repeat. It''s truly a masterclass in living in the moment. Forget your to-do lists and your worries for a sec; Koda reminds us that sometimes, the best thing','','sport','#sport','2026-02-11 09:55:03',153,'$61.20',NULL),
+ (188,'rtonline','my-daily-walking-stats-february-11-2026','https://i.hizliresim.com/YOvDNE.jpg',69,'My Daily Walking Stats February 11 2026','![](https://images.ecency.com/DQmRD4ejYQWUPQL7fQEUCSqLqJaeKcU5UAwS7n8Rjk9yZcc/11022.jpg)
 
 Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early in the morning and after sending the children to school, my wife and I went to the hospital. The news is very good for now, and my doctor has told me to stop taking three of my medications. This is truly wonderful news, but only time will tell if it is beneficial. I hope my muscle aches go away, which means I''ll be able to take more steps. Time will tell. Also, I managed to exceed 5K today. It''s been a tiring day and I''m going to bed early.
 
@@ -1134,8 +1029,8 @@ According to Google Fit, I walked 5578  steps, 3.69 km, and burned 1931 Cal. Tak
 
 Stay healthy and with love!
 Thank you for reading
-@rtonline','Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early in the morning and after sending the children to school, my wife and I went to the hospital. The news is very good for now, and my doctor has told me to stop taking three of my medications. This is truly wonderful news, but only time will tell if it is beneficial. I hope my muscle aches go away, which means I''ll be able to take more steps. Time will tell. Also, I managed to exceed 5K today.','https://images.ecency.com/DQmRD4ejYQWUPQL7fQEUCSqLqJaeKcU5UAwS7n8Rjk9yZcc/11022.jpg','activity','#activity','2026-02-12 01:06:18',12,'$4.80',NULL);
-INSERT INTO "posts_post" VALUES (189,'rtonline','my-daily-walking-stats-february-10-2026','https://i.hizliresim.com/YOvDNE.jpg',69,'My Daily Walking Stats February 10 2026','![](https://images.ecency.com/DQmbpZqT7Jq7aFJhKyvdd3iDWBdgrkD9RnHPRrPmM6x6Fro/10022.jpg)
+@rtonline','Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early in the morning and after sending the children to school, my wife and I went to the hospital. The news is very good for now, and my doctor has told me to stop taking three of my medications. This is truly wonderful news, but only time will tell if it is beneficial. I hope my muscle aches go away, which means I''ll be able to take more steps. Time will tell. Also, I managed to exceed 5K today.','https://images.ecency.com/DQmRD4ejYQWUPQL7fQEUCSqLqJaeKcU5UAwS7n8Rjk9yZcc/11022.jpg','activity','#activity','2026-02-12 01:06:18',12,'$4.80',NULL),
+ (189,'rtonline','my-daily-walking-stats-february-10-2026','https://i.hizliresim.com/YOvDNE.jpg',69,'My Daily Walking Stats February 10 2026','![](https://images.ecency.com/DQmbpZqT7Jq7aFJhKyvdd3iDWBdgrkD9RnHPRrPmM6x6Fro/10022.jpg)
 
 Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early this morning and felt better today. The weather was clear but chilly. I''m going to the doctor tomorrow morning, hopefully there won''t be any problems and everything will go well. I also have a dentist appointment this week, so I didn''t want to tire myself out. I didn''t go out today; I just walked on the treadmill. But I''ll go out tomorrow. And today I managed to surpass 5K.
 
@@ -1145,8 +1040,8 @@ According to Google Fit, I walked 5321 steps, 3.74 km, and burned 2184 Cal. Take
 
 Stay healthy and with love!
 Thank you for reading
-@rtonline','Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early this morning and felt better today. The weather was clear but chilly. I''m going to the doctor tomorrow morning, hopefully there won''t be any problems and everything will go well. I also have a dentist appointment this week, so I didn''t want to tire myself out. I didn''t go out today; I just walked on the treadmill. But I''ll go out tomorrow. And today I managed to surpass 5K. According to Google Fit, I walked 5321 steps, 3.74','https://images.ecency.com/DQmbpZqT7Jq7aFJhKyvdd3iDWBdgrkD9RnHPRrPmM6x6Fro/10022.jpg','activity','#activity','2026-02-11 03:07:39',15,'$6.00',NULL);
-INSERT INTO "posts_post" VALUES (190,'infogalaxy','the-scientific-formula-how-experts-quantify-sporting-difficulty','https://cdn.steemitimages.com/DQmVTHFxTp5HsP247FUqpgCkNHim7bLcEiEaaX7DitSTo4a/Gmail%20Profile%20Image.jpg',35,'The Scientific Formula: How Experts Quantify Sporting Difficulty.','<html>
+@rtonline','Hello everyone, I hope everything is going well in your life and you are having a wonderful day. I woke up early this morning and felt better today. The weather was clear but chilly. I''m going to the doctor tomorrow morning, hopefully there won''t be any problems and everything will go well. I also have a dentist appointment this week, so I didn''t want to tire myself out. I didn''t go out today; I just walked on the treadmill. But I''ll go out tomorrow. And today I managed to surpass 5K. According to Google Fit, I walked 5321 steps, 3.74','https://images.ecency.com/DQmbpZqT7Jq7aFJhKyvdd3iDWBdgrkD9RnHPRrPmM6x6Fro/10022.jpg','activity','#activity','2026-02-11 03:07:39',15,'$6.00',NULL),
+ (190,'infogalaxy','the-scientific-formula-how-experts-quantify-sporting-difficulty','https://cdn.steemitimages.com/DQmVTHFxTp5HsP247FUqpgCkNHim7bLcEiEaaX7DitSTo4a/Gmail%20Profile%20Image.jpg',35,'The Scientific Formula: How Experts Quantify Sporting Difficulty.','<html>
 <p><img src="https://images.unsplash.com/photo-1721750475749-02b44d91d726?q=80&amp;w=687&amp;auto=format&amp;fit=crop&amp;ixlib=rb-4.1.0&amp;ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"/></p>
 <p>Determining the hardest sport is not merely a matter of opinion. Sports scientists, journalists, and athletic organizations have developed methodologies to quantify difficulty using objective metrics. These studies provide fascinating insights into what makes certain sports extraordinarily demanding. This article examines the scientific approaches to measuring sporting difficulty and what the data reveals.</p>
 <p><strong>ESPN&#x27;s Degree of Difficulty Project</strong></p>
@@ -1208,8 +1103,8 @@ INSERT INTO "posts_post" VALUES (190,'infogalaxy','the-scientific-formula-how-ex
 <p><strong>Longevity:</strong> Sports like golf and tennis require decades of sustained excellence, a different kind of difficulty than explosive, short careers.</p>
 <p>Scientific difficulty rankings offer objective frameworks for debate, but they cannot deliver a definitive answer. The hardest sport depends on which metrics you prioritize and which athletic qualities you value most. As we explore individual sports throughout this series, we will apply these scientific lenses while acknowledging that some aspects of sporting greatness remain beyond measurement.</p>
 <p></p>
-</html>','Determining the hardest sport is not merely a matter of opinion. Sports scientists, journalists, and athletic organizations have developed methodologies to quantify difficulty using objective metrics. These studies provide fascinating insights into what makes certain sports extraordinarily demanding. This article examines the scientific approaches to measuring sporting difficulty and what the data reveals. ESPN''s Degree of Difficulty Project One of the most comprehensive attempts to rank sports difficulty came from ESPN in 2004 and again in 2019. Their panel of experts evaluated sports across ten key athletic skills: The Ten Metrics: • Endurance • Power • Speed • Agility •','https://images.unsplash.com/photo-1721750475749-02b44d91d726?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D','sports','#sports','2026-02-16 22:38:39',0,'$0.00',NULL);
-INSERT INTO "posts_post" VALUES (191,'alrikorion','understanding-new88-and-the-role-of-new88thai','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'Understanding NEW88 and the Role of new88thai','<p dir="ltr">The world of online betting and digital gaming has expanded significantly in recent years, with platforms like NEW88 becoming widely known among users in Asia and beyond. When researching this topic, terms like ลิขสิทธิ์ NEW88 (the licensing of NEW88) and <strong><a href="http://new88thai.com">new88thai.com</a></strong> often appear. These relate to the legal and operational aspects of the platform, including how it claims to be regulated, what licensing credentials it presents, and what users should consider before engaging with any online betting site.</p>
+</html>','Determining the hardest sport is not merely a matter of opinion. Sports scientists, journalists, and athletic organizations have developed methodologies to quantify difficulty using objective metrics. These studies provide fascinating insights into what makes certain sports extraordinarily demanding. This article examines the scientific approaches to measuring sporting difficulty and what the data reveals. ESPN''s Degree of Difficulty Project One of the most comprehensive attempts to rank sports difficulty came from ESPN in 2004 and again in 2019. Their panel of experts evaluated sports across ten key athletic skills: The Ten Metrics: • Endurance • Power • Speed • Agility •','https://images.unsplash.com/photo-1721750475749-02b44d91d726?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D','sports','#sports','2026-02-16 22:38:39',0,'$0.00',NULL),
+ (191,'alrikorion','understanding-new88-and-the-role-of-new88thai','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'Understanding NEW88 and the Role of new88thai','<p dir="ltr">The world of online betting and digital gaming has expanded significantly in recent years, with platforms like NEW88 becoming widely known among users in Asia and beyond. When researching this topic, terms like ลิขสิทธิ์ NEW88 (the licensing of NEW88) and <strong><a href="http://new88thai.com">new88thai.com</a></strong> often appear. These relate to the legal and operational aspects of the platform, including how it claims to be regulated, what licensing credentials it presents, and what users should consider before engaging with any online betting site.</p>
 <h1 dir="ltr">What Is NEW88?</h1>
 <p dir="ltr">NEW88 is a brand name associated with online betting services that include a variety of gambling activities such as sports wagering, live casino games, slot machines, and virtual competitions. The name itself is used by various sites that claim to offer gaming services under the NEW88 brand identity. Many of these sites describe themselves as international platforms for digital entertainment, attracting users with a range of betting options and interactive games.</p>
 <p dir="ltr">The central concept behind the platform is to provide a comprehensive entertainment hub where players can log in, make deposits, place bets, and monitor gaming outcomes through a centralized interface designed for both desktop and mobile access.</p>
@@ -1233,12 +1128,12 @@ INSERT INTO "posts_post" VALUES (191,'alrikorion','understanding-new88-and-the-r
 <p dir="ltr">Finally, consider whether the platform&rsquo;s operations are compatible with the legal requirements of your own jurisdiction. Even if a platform holds a foreign license, it may not be legal for users in certain countries to engage with its services.</p>
 <h1 dir="ltr">Conclusion</h1>
 <p dir="ltr">Understanding <strong><a href="https://new88thai.com/copyright-new88/">ลิขสิทธิ์ NEW88</a></strong> and the context surrounding new88thai.com involves more than just reading the claims on a website. Licensing in the online betting industry is a critical component of trust, fairness, and legal compliance. Platforms that claim to operate under licenses from recognized authorities such as PAGCOR or offshore regulators are generally more credible than those that do not provide verifiable credentials.</p>
-<p dir="ltr">However, verifying these claims through official regulatory websites and understanding the local legal environment where you live remains essential. This helps ensure that you engage with online betting platforms in a manner that is both safe and compliant with applicable laws.</p>','The world of online betting and digital gaming has expanded significantly in recent years, with platforms like NEW88 becoming widely known among users in Asia and beyond. When researching this topic, terms like ลิขสิทธิ์ NEW88 (the licensing of NEW88) and new88thai.com often appear. These relate to the legal and operational aspects of the platform, including how it claims to be regulated, what licensing credentials it presents, and what users should consider before engaging with any online betting site. What Is NEW88? NEW88 is a brand name associated with online betting services that include a variety of gambling activities such as','','sports','#sports','2026-02-13 17:31:12',0,'$0.00',NULL);
-INSERT INTO "posts_post" VALUES (192,'frannyboi','raheem-sterling-has-joined-dutch-sign-feyenoord-until-the-end-of-the-season','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'Raheem Sterling has joined Dutch sign Feyenoord until the end of the season.','Chelsea and Raheem Sterling severed ties in January after mutually agreeing the terms of his exit; the 31-year-old winger has not played since his loan at Arsenal in May 2025; he will link up with former Man Utd and Arsenal striker Robin van Persie, who is now head coach of Feyenoord','Chelsea and Raheem Sterling severed ties in January after mutually agreeing the terms of his exit; the 31-year-old winger has not played since his loan at Arsenal in May 2025; he will link up with former Man Utd and Arsenal striker Robin van Persie, who is now head coach of Feyenoord','','sports','#sports','2026-02-12 23:54:06',0,'$0.00',NULL);
-INSERT INTO "posts_post" VALUES (193,'davidchristain','what-steps-ensure-a-successful-luxury-home-renovation-project','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',22,'What Steps Ensure a Successful Luxury Home Renovation Project?','A successful luxury home renovation project begins with selecting a trusted Luxury Remodeling Company with experience in high-end properties. Best Luxury Remodeling Company teams in Greensboro prioritize clear communication, detailed project plans, and realistic timelines. Homeowners should start by defining goals, budgeting carefully, and choosing premium materials that align with design vision. [Luxury Remodeling Company in Greensboro NC](https://tavirllc.com/) professionals conduct thorough inspections, assess structural integrity, and identify potential challenges before work begins. Coordinating skilled contractors, designers, and tradespeople ensures each phase—from demolition to finishing—is executed efficiently. Continuous monitoring and quality checks maintain craftsmanship standards, delivering a final result that meets aesthetic expectations and functional requirements.','A successful luxury home renovation project begins with selecting a trusted Luxury Remodeling Company with experience in high-end properties. Best Luxury Remodeling Company teams in Greensboro prioritize clear communication, detailed project plans, and realistic timelines. Homeowners should start by defining goals, budgeting carefully, and choosing premium materials that align with design vision. Luxury Remodeling Company in Greensboro NC professionals conduct thorough inspections, assess structural integrity, and identify potential challenges before work begins. Coordinating skilled contractors, designers, and tradespeople ensures each phase—from demolition to finishing—is executed efficiently. Continuous monitoring and quality checks maintain craftsmanship standards, delivering a final result that meets','','home','#home','2026-02-17 18:40:57',0,'$0.00',NULL);
-INSERT INTO "posts_post" VALUES (194,'davidchristain','how-do-high-end-homes-balance-design-comfort-and-function','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',22,'How Do High-End Homes Balance Design, Comfort, and Function?','A skilled [luxury home builder Los Angeles](https://cedarconstruct.com/) understands that true upscale living blends architectural beauty with everyday practicality. High-end homes are designed with open layouts, natural lighting, and premium materials that create elegance without sacrificing comfort. Affordable luxury home builders in Los Angeles focus on smart space planning, ensuring kitchens, living areas, and private suites flow naturally. Custom luxury home builders in Los Angeles often integrate energy-efficient systems, advanced insulation, and smart home technology to improve functionality. Thoughtful storage solutions, high ceilings, and indoor-outdoor connections enhance both lifestyle and property value. The goal is to create a residence that looks refined while supporting daily convenience and long-term durability.','A skilled luxury home builder Los Angeles understands that true upscale living blends architectural beauty with everyday practicality. High-end homes are designed with open layouts, natural lighting, and premium materials that create elegance without sacrificing comfort. Affordable luxury home builders in Los Angeles focus on smart space planning, ensuring kitchens, living areas, and private suites flow naturally. Custom luxury home builders in Los Angeles often integrate energy-efficient systems, advanced insulation, and smart home technology to improve functionality. Thoughtful storage solutions, high ceilings, and indoor-outdoor connections enhance both lifestyle and property value. The goal is to create a residence that looks','','home','#home','2026-02-17 16:21:48',0,'$0.00',NULL);
-INSERT INTO "posts_post" VALUES (195,'davidchristain','what-planning-steps-reduce-cracking-in-outdoor-hardscapes','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',22,'What Planning Steps Reduce Cracking in Outdoor Hardscapes?','Thorough planning significantly reduces cracking risks. [Masonry contractors in New Jersey](https://njmasonrypavers.com/) assess ground movement and moisture exposure before construction begins. Base layers must be compacted evenly to support stone or pavers. Concrete pool deck contractors near me install control joints that allow slight expansion without surface damage. Reinforcement grids and proper curing techniques also limit shrinkage cracks. Careful scheduling during moderate weather conditions ensures materials set correctly. Professional oversight during every phase keeps outdoor hardscapes smooth, level, and resilient.','Thorough planning significantly reduces cracking risks. Masonry contractors in New Jersey assess ground movement and moisture exposure before construction begins. Base layers must be compacted evenly to support stone or pavers. Concrete pool deck contractors near me install control joints that allow slight expansion without surface damage. Reinforcement grids and proper curing techniques also limit shrinkage cracks. Careful scheduling during moderate weather conditions ensures materials set correctly. Professional oversight during every phase keeps outdoor hardscapes smooth, level, and resilient.','','home','#home','2026-02-12 14:12:24',0,'$0.00',NULL);
-INSERT INTO "posts_post" VALUES (196,'thevpnboss','standing-accountable-for-your-decisions-and-goals','https://cdn.steemitimages.com/DQmZfe9ezNPi93VZMDodCfMkwncgJeXv4MASHFP31WdwVSN/american%20netflix.jpg',79,'Standing Accountable for Your Decisions and Goals','There is something strangely powerful about saying: *“This is on me.”*
+<p dir="ltr">However, verifying these claims through official regulatory websites and understanding the local legal environment where you live remains essential. This helps ensure that you engage with online betting platforms in a manner that is both safe and compliant with applicable laws.</p>','The world of online betting and digital gaming has expanded significantly in recent years, with platforms like NEW88 becoming widely known among users in Asia and beyond. When researching this topic, terms like ลิขสิทธิ์ NEW88 (the licensing of NEW88) and new88thai.com often appear. These relate to the legal and operational aspects of the platform, including how it claims to be regulated, what licensing credentials it presents, and what users should consider before engaging with any online betting site. What Is NEW88? NEW88 is a brand name associated with online betting services that include a variety of gambling activities such as','','sports','#sports','2026-02-13 17:31:12',0,'$0.00',NULL),
+ (192,'frannyboi','raheem-sterling-has-joined-dutch-sign-feyenoord-until-the-end-of-the-season','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',35,'Raheem Sterling has joined Dutch sign Feyenoord until the end of the season.','Chelsea and Raheem Sterling severed ties in January after mutually agreeing the terms of his exit; the 31-year-old winger has not played since his loan at Arsenal in May 2025; he will link up with former Man Utd and Arsenal striker Robin van Persie, who is now head coach of Feyenoord','Chelsea and Raheem Sterling severed ties in January after mutually agreeing the terms of his exit; the 31-year-old winger has not played since his loan at Arsenal in May 2025; he will link up with former Man Utd and Arsenal striker Robin van Persie, who is now head coach of Feyenoord','','sports','#sports','2026-02-12 23:54:06',0,'$0.00',NULL),
+ (193,'davidchristain','what-steps-ensure-a-successful-luxury-home-renovation-project','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',22,'What Steps Ensure a Successful Luxury Home Renovation Project?','A successful luxury home renovation project begins with selecting a trusted Luxury Remodeling Company with experience in high-end properties. Best Luxury Remodeling Company teams in Greensboro prioritize clear communication, detailed project plans, and realistic timelines. Homeowners should start by defining goals, budgeting carefully, and choosing premium materials that align with design vision. [Luxury Remodeling Company in Greensboro NC](https://tavirllc.com/) professionals conduct thorough inspections, assess structural integrity, and identify potential challenges before work begins. Coordinating skilled contractors, designers, and tradespeople ensures each phase—from demolition to finishing—is executed efficiently. Continuous monitoring and quality checks maintain craftsmanship standards, delivering a final result that meets aesthetic expectations and functional requirements.','A successful luxury home renovation project begins with selecting a trusted Luxury Remodeling Company with experience in high-end properties. Best Luxury Remodeling Company teams in Greensboro prioritize clear communication, detailed project plans, and realistic timelines. Homeowners should start by defining goals, budgeting carefully, and choosing premium materials that align with design vision. Luxury Remodeling Company in Greensboro NC professionals conduct thorough inspections, assess structural integrity, and identify potential challenges before work begins. Coordinating skilled contractors, designers, and tradespeople ensures each phase—from demolition to finishing—is executed efficiently. Continuous monitoring and quality checks maintain craftsmanship standards, delivering a final result that meets','','home','#home','2026-02-17 18:40:57',0,'$0.00',NULL),
+ (194,'davidchristain','how-do-high-end-homes-balance-design-comfort-and-function','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',22,'How Do High-End Homes Balance Design, Comfort, and Function?','A skilled [luxury home builder Los Angeles](https://cedarconstruct.com/) understands that true upscale living blends architectural beauty with everyday practicality. High-end homes are designed with open layouts, natural lighting, and premium materials that create elegance without sacrificing comfort. Affordable luxury home builders in Los Angeles focus on smart space planning, ensuring kitchens, living areas, and private suites flow naturally. Custom luxury home builders in Los Angeles often integrate energy-efficient systems, advanced insulation, and smart home technology to improve functionality. Thoughtful storage solutions, high ceilings, and indoor-outdoor connections enhance both lifestyle and property value. The goal is to create a residence that looks refined while supporting daily convenience and long-term durability.','A skilled luxury home builder Los Angeles understands that true upscale living blends architectural beauty with everyday practicality. High-end homes are designed with open layouts, natural lighting, and premium materials that create elegance without sacrificing comfort. Affordable luxury home builders in Los Angeles focus on smart space planning, ensuring kitchens, living areas, and private suites flow naturally. Custom luxury home builders in Los Angeles often integrate energy-efficient systems, advanced insulation, and smart home technology to improve functionality. Thoughtful storage solutions, high ceilings, and indoor-outdoor connections enhance both lifestyle and property value. The goal is to create a residence that looks','','home','#home','2026-02-17 16:21:48',0,'$0.00',NULL),
+ (195,'davidchristain','what-planning-steps-reduce-cracking-in-outdoor-hardscapes','https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',22,'What Planning Steps Reduce Cracking in Outdoor Hardscapes?','Thorough planning significantly reduces cracking risks. [Masonry contractors in New Jersey](https://njmasonrypavers.com/) assess ground movement and moisture exposure before construction begins. Base layers must be compacted evenly to support stone or pavers. Concrete pool deck contractors near me install control joints that allow slight expansion without surface damage. Reinforcement grids and proper curing techniques also limit shrinkage cracks. Careful scheduling during moderate weather conditions ensures materials set correctly. Professional oversight during every phase keeps outdoor hardscapes smooth, level, and resilient.','Thorough planning significantly reduces cracking risks. Masonry contractors in New Jersey assess ground movement and moisture exposure before construction begins. Base layers must be compacted evenly to support stone or pavers. Concrete pool deck contractors near me install control joints that allow slight expansion without surface damage. Reinforcement grids and proper curing techniques also limit shrinkage cracks. Careful scheduling during moderate weather conditions ensures materials set correctly. Professional oversight during every phase keeps outdoor hardscapes smooth, level, and resilient.','','home','#home','2026-02-12 14:12:24',0,'$0.00',NULL),
+ (196,'thevpnboss','standing-accountable-for-your-decisions-and-goals','https://cdn.steemitimages.com/DQmZfe9ezNPi93VZMDodCfMkwncgJeXv4MASHFP31WdwVSN/american%20netflix.jpg',79,'Standing Accountable for Your Decisions and Goals','There is something strangely powerful about saying: *“This is on me.”*
 
 Not in a self-blaming, heavy, shame-filled way. But in a grounded, calm, grown-up way. The kind of ownership that doesn’t look for excuses, doesn’t point fingers, and doesn’t wait for perfect circumstances. Just a quiet decision: **I choose this. I’m responsible for this.**
 
@@ -1296,8 +1191,8 @@ At the end of the day, you are living the consequences of your decisions — goo
 
 Stand tall. Own it. Adjust when needed. Move forward.
 
-Your future self will thank you.','There is something strangely powerful about saying: “This is on me.” Not in a self-blaming, heavy, shame-filled way. But in a grounded, calm, grown-up way. The kind of ownership that doesn’t look for excuses, doesn’t point fingers, and doesn’t wait for perfect circumstances. Just a quiet decision: I choose this. I’m responsible for this. Accountability is uncomfortable because it removes our favorite escape routes. If your goals aren’t moving forward, you can’t blame timing, the market, your childhood, your boss, your spouse, or Mercury being in retrograde. You have to look in the mirror and ask: What did I actually','','life','#life','2026-02-16 20:33:12',74,'$29.60',NULL);
-INSERT INTO "posts_post" VALUES (197,'thevpnboss','drawing-strength-from-god-when-he-is-your-source','https://cdn.steemitimages.com/DQmZfe9ezNPi93VZMDodCfMkwncgJeXv4MASHFP31WdwVSN/american%20netflix.jpg',79,'Drawing Strength from God – When He Is Your Source','There are seasons in life when your own strength simply isn’t enough. You can drink the coffee, make the plans, organize the calendar, smile for people… and still feel empty inside. The Bible never denies that weakness is real. In fact, it leans into it.
+Your future self will thank you.','There is something strangely powerful about saying: “This is on me.” Not in a self-blaming, heavy, shame-filled way. But in a grounded, calm, grown-up way. The kind of ownership that doesn’t look for excuses, doesn’t point fingers, and doesn’t wait for perfect circumstances. Just a quiet decision: I choose this. I’m responsible for this. Accountability is uncomfortable because it removes our favorite escape routes. If your goals aren’t moving forward, you can’t blame timing, the market, your childhood, your boss, your spouse, or Mercury being in retrograde. You have to look in the mirror and ask: What did I actually','','life','#life','2026-02-16 20:33:12',74,'$29.60',NULL),
+ (197,'thevpnboss','drawing-strength-from-god-when-he-is-your-source','https://cdn.steemitimages.com/DQmZfe9ezNPi93VZMDodCfMkwncgJeXv4MASHFP31WdwVSN/american%20netflix.jpg',79,'Drawing Strength from God – When He Is Your Source','There are seasons in life when your own strength simply isn’t enough. You can drink the coffee, make the plans, organize the calendar, smile for people… and still feel empty inside. The Bible never denies that weakness is real. In fact, it leans into it.
 
 “God is our refuge and strength, an ever-present help in trouble.” (Psalm 46:1)
 
@@ -1335,94 +1230,59 @@ Strength in God does not always look like action. Sometimes it looks like trust.
 
 When God is your source, you are no longer a battery that must constantly recharge yourself. You are connected to an endless current. And that current does not run dry.
 
-Draw near. Ask honestly. Stay connected. Let Him be your strength.','There are seasons in life when your own strength simply isn’t enough. You can drink the coffee, make the plans, organize the calendar, smile for people… and still feel empty inside. The Bible never denies that weakness is real. In fact, it leans into it. “God is our refuge and strength, an ever-present help in trouble.” (Psalm 46:1) Notice something important: it doesn’t say God gives strength occasionally. It says He is our strength. That changes everything. If He is the source, then you are not required to manufacture power from within yourself. 1. Admit Your Weakness The first step','','god','#god','2026-02-15 21:24:33',69,'$27.60',NULL);
-INSERT INTO "posts_post" VALUES (198,'sebastianreed','4jzfqc-unique-opportunities-for-australian-players','https://cdn.steemitimages.com/DQmVS96rnYCHngMqKrnPH4r5iryogwBkpu3ojZmgwmKGy5S/1646920164_57-kartinkin-net-p-kartinki-parnei-na-avu-64.jpg',35,'unique opportunities for Australian players','Level-Up.Casino (EN-AU) is a modern online entertainment platform aimed at Australian users, combining a user-friendly interface, diverse content, and mobile compatibility. This website offers an engaging and dynamic experience, allowing everyone to quickly find their favorite games, participate in promotions, and learn about the platform''s key features in an accessible and understandable format. Thanks to its well-thought-out structure and wide selection, Level-Up.Casino is becoming a popular resource for those who value quality, convenience, and up-to-date information. One of https://level-up.casino/en-au/ main advantages is the diversity of available gaming content: from classic slots to modern solutions with unique plots and features. The platform partners with leading industry providers, ensuring high-quality graphics, smooth gameplay, and stability. This combination allows users to enjoy their favorite games at any time, whether on a computer or mobile device. Level-Up.Casino EN-AU is particularly appealing to Australian audiences thanks to local adaptations that take into account regional preferences and current conditions.','Level-Up.Casino (EN-AU) is a modern online entertainment platform aimed at Australian users, combining a user-friendly interface, diverse content, and mobile compatibility. This website offers an engaging and dynamic experience, allowing everyone to quickly find their favorite games, participate in promotions, and learn about the platform''s key features in an accessible and understandable format. Thanks to its well-thought-out structure and wide selection, Level-Up.Casino is becoming a popular resource for those who value quality, convenience, and up-to-date information. One of https://level-up.casino/en-au/ main advantages is the diversity of available gaming content: from classic slots to modern solutions with unique plots and features. The','','work','#work','2026-02-14 01:44:36',0,'$0.00',NULL);
-INSERT INTO "posts_vote" VALUES (1,196,1,'2026-02-17 21:04:57.757439',1,1);
-INSERT INTO "posts_vote" VALUES (4,340,1,'2026-02-17 21:07:06.959299',2,1);
-INSERT INTO "posts_vote" VALUES (5,341,1,'2026-02-17 21:08:30.253707',2,1);
-CREATE INDEX IF NOT EXISTS "auth_group_permissions_group_id_b120cbf9" ON "auth_group_permissions" (
-	"group_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "auth_group_permissions_group_id_permission_id_0cd325b0_uniq" ON "auth_group_permissions" (
-	"group_id",
-	"permission_id"
-);
-CREATE INDEX IF NOT EXISTS "auth_group_permissions_permission_id_84c5c92e" ON "auth_group_permissions" (
-	"permission_id"
-);
-CREATE INDEX IF NOT EXISTS "auth_permission_content_type_id_2f476e4b" ON "auth_permission" (
-	"content_type_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "auth_permission_content_type_id_codename_01ab375a_uniq" ON "auth_permission" (
-	"content_type_id",
-	"codename"
-);
-CREATE INDEX IF NOT EXISTS "django_admin_log_content_type_id_c4bce8eb" ON "django_admin_log" (
-	"content_type_id"
-);
-CREATE INDEX IF NOT EXISTS "django_admin_log_user_id_c564eba6" ON "django_admin_log" (
-	"user_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "django_content_type_app_label_model_76bd3d3b_uniq" ON "django_content_type" (
-	"app_label",
-	"model"
-);
-CREATE INDEX IF NOT EXISTS "django_session_expire_date_a5c62663" ON "django_session" (
-	"expire_date"
-);
-CREATE INDEX IF NOT EXISTS "participants_participant_groups_group_id_8231f3f0" ON "participants_participant_groups" (
-	"group_id"
-);
-CREATE INDEX IF NOT EXISTS "participants_participant_groups_participant_id_f4f53abe" ON "participants_participant_groups" (
-	"participant_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "participants_participant_groups_participant_id_group_id_f7f60cdd_uniq" ON "participants_participant_groups" (
-	"participant_id",
-	"group_id"
-);
-CREATE INDEX IF NOT EXISTS "participants_participant_user_permissions_participant_id_3d02b94e" ON "participants_participant_user_permissions" (
-	"participant_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "participants_participant_user_permissions_participant_id_permission_id_a346460e_uniq" ON "participants_participant_user_permissions" (
-	"participant_id",
-	"permission_id"
-);
-CREATE INDEX IF NOT EXISTS "participants_participant_user_permissions_permission_id_06cf010b" ON "participants_participant_user_permissions" (
-	"permission_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "posts_comment_author_permlink_955f90a8_uniq" ON "posts_comment" (
-	"author",
-	"permlink"
-);
-CREATE INDEX IF NOT EXISTS "posts_comment_parent_id_ae76dcba" ON "posts_comment" (
-	"parent_id"
-);
-CREATE INDEX IF NOT EXISTS "posts_comment_post_id_e81436d7" ON "posts_comment" (
-	"post_id"
-);
-CREATE INDEX IF NOT EXISTS "posts_comment_user_id_ad949c47" ON "posts_comment" (
-	"user_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "posts_post_author_permlink_00dde032_uniq" ON "posts_post" (
-	"author",
-	"permlink"
-);
-CREATE INDEX IF NOT EXISTS "posts_post_user_id_a4f40dc7" ON "posts_post" (
-	"user_id"
-);
-CREATE INDEX IF NOT EXISTS "posts_vote_content_33a66f_idx" ON "posts_vote" (
-	"content_type_id",
-	"object_id"
-);
-CREATE INDEX IF NOT EXISTS "posts_vote_content_type_id_1f02ed34" ON "posts_vote" (
-	"content_type_id"
-);
-CREATE INDEX IF NOT EXISTS "posts_vote_user_id_8509048a" ON "posts_vote" (
-	"user_id"
-);
-CREATE UNIQUE INDEX IF NOT EXISTS "posts_vote_user_id_content_type_id_object_id_df7f02c7_uniq" ON "posts_vote" (
-	"user_id",
-	"content_type_id",
-	"object_id"
-);
+Draw near. Ask honestly. Stay connected. Let Him be your strength.','There are seasons in life when your own strength simply isn’t enough. You can drink the coffee, make the plans, organize the calendar, smile for people… and still feel empty inside. The Bible never denies that weakness is real. In fact, it leans into it. “God is our refuge and strength, an ever-present help in trouble.” (Psalm 46:1) Notice something important: it doesn’t say God gives strength occasionally. It says He is our strength. That changes everything. If He is the source, then you are not required to manufacture power from within yourself. 1. Admit Your Weakness The first step','','god','#god','2026-02-15 21:24:33',69,'$27.60',NULL),
+ (198,'sebastianreed','4jzfqc-unique-opportunities-for-australian-players','https://cdn.steemitimages.com/DQmVS96rnYCHngMqKrnPH4r5iryogwBkpu3ojZmgwmKGy5S/1646920164_57-kartinkin-net-p-kartinki-parnei-na-avu-64.jpg',35,'unique opportunities for Australian players','Level-Up.Casino (EN-AU) is a modern online entertainment platform aimed at Australian users, combining a user-friendly interface, diverse content, and mobile compatibility. This website offers an engaging and dynamic experience, allowing everyone to quickly find their favorite games, participate in promotions, and learn about the platform''s key features in an accessible and understandable format. Thanks to its well-thought-out structure and wide selection, Level-Up.Casino is becoming a popular resource for those who value quality, convenience, and up-to-date information. One of https://level-up.casino/en-au/ main advantages is the diversity of available gaming content: from classic slots to modern solutions with unique plots and features. The platform partners with leading industry providers, ensuring high-quality graphics, smooth gameplay, and stability. This combination allows users to enjoy their favorite games at any time, whether on a computer or mobile device. Level-Up.Casino EN-AU is particularly appealing to Australian audiences thanks to local adaptations that take into account regional preferences and current conditions.','Level-Up.Casino (EN-AU) is a modern online entertainment platform aimed at Australian users, combining a user-friendly interface, diverse content, and mobile compatibility. This website offers an engaging and dynamic experience, allowing everyone to quickly find their favorite games, participate in promotions, and learn about the platform''s key features in an accessible and understandable format. Thanks to its well-thought-out structure and wide selection, Level-Up.Casino is becoming a popular resource for those who value quality, convenience, and up-to-date information. One of https://level-up.casino/en-au/ main advantages is the diversity of available gaming content: from classic slots to modern solutions with unique plots and features. The','','work','#work','2026-02-14 01:44:36',0,'$0.00',NULL);
+INSERT INTO "posts_vote" ("id","object_id","value","voted_at","content_type_id","user_id") VALUES (1,196,1,'2026-02-17 21:04:57.757439',1,1),
+ (4,340,1,'2026-02-17 21:07:06.959299',2,1),
+ (5,341,1,'2026-02-17 21:08:30.253707',2,1);
+DROP INDEX IF EXISTS "auth_group_permissions_group_id_b120cbf9";
+CREATE INDEX "auth_group_permissions_group_id_b120cbf9" ON "auth_group_permissions" ("group_id");
+DROP INDEX IF EXISTS "auth_group_permissions_group_id_permission_id_0cd325b0_uniq";
+CREATE UNIQUE INDEX "auth_group_permissions_group_id_permission_id_0cd325b0_uniq" ON "auth_group_permissions" ("group_id", "permission_id");
+DROP INDEX IF EXISTS "auth_group_permissions_permission_id_84c5c92e";
+CREATE INDEX "auth_group_permissions_permission_id_84c5c92e" ON "auth_group_permissions" ("permission_id");
+DROP INDEX IF EXISTS "auth_permission_content_type_id_2f476e4b";
+CREATE INDEX "auth_permission_content_type_id_2f476e4b" ON "auth_permission" ("content_type_id");
+DROP INDEX IF EXISTS "auth_permission_content_type_id_codename_01ab375a_uniq";
+CREATE UNIQUE INDEX "auth_permission_content_type_id_codename_01ab375a_uniq" ON "auth_permission" ("content_type_id", "codename");
+DROP INDEX IF EXISTS "django_admin_log_content_type_id_c4bce8eb";
+CREATE INDEX "django_admin_log_content_type_id_c4bce8eb" ON "django_admin_log" ("content_type_id");
+DROP INDEX IF EXISTS "django_admin_log_user_id_c564eba6";
+CREATE INDEX "django_admin_log_user_id_c564eba6" ON "django_admin_log" ("user_id");
+DROP INDEX IF EXISTS "django_content_type_app_label_model_76bd3d3b_uniq";
+CREATE UNIQUE INDEX "django_content_type_app_label_model_76bd3d3b_uniq" ON "django_content_type" ("app_label", "model");
+DROP INDEX IF EXISTS "django_session_expire_date_a5c62663";
+CREATE INDEX "django_session_expire_date_a5c62663" ON "django_session" ("expire_date");
+DROP INDEX IF EXISTS "participants_participant_groups_group_id_8231f3f0";
+CREATE INDEX "participants_participant_groups_group_id_8231f3f0" ON "participants_participant_groups" ("group_id");
+DROP INDEX IF EXISTS "participants_participant_groups_participant_id_f4f53abe";
+CREATE INDEX "participants_participant_groups_participant_id_f4f53abe" ON "participants_participant_groups" ("participant_id");
+DROP INDEX IF EXISTS "participants_participant_groups_participant_id_group_id_f7f60cdd_uniq";
+CREATE UNIQUE INDEX "participants_participant_groups_participant_id_group_id_f7f60cdd_uniq" ON "participants_participant_groups" ("participant_id", "group_id");
+DROP INDEX IF EXISTS "participants_participant_user_permissions_participant_id_3d02b94e";
+CREATE INDEX "participants_participant_user_permissions_participant_id_3d02b94e" ON "participants_participant_user_permissions" ("participant_id");
+DROP INDEX IF EXISTS "participants_participant_user_permissions_participant_id_permission_id_a346460e_uniq";
+CREATE UNIQUE INDEX "participants_participant_user_permissions_participant_id_permission_id_a346460e_uniq" ON "participants_participant_user_permissions" ("participant_id", "permission_id");
+DROP INDEX IF EXISTS "participants_participant_user_permissions_permission_id_06cf010b";
+CREATE INDEX "participants_participant_user_permissions_permission_id_06cf010b" ON "participants_participant_user_permissions" ("permission_id");
+DROP INDEX IF EXISTS "posts_comment_author_permlink_955f90a8_uniq";
+CREATE UNIQUE INDEX "posts_comment_author_permlink_955f90a8_uniq" ON "posts_comment" ("author", "permlink");
+DROP INDEX IF EXISTS "posts_comment_parent_id_ae76dcba";
+CREATE INDEX "posts_comment_parent_id_ae76dcba" ON "posts_comment" ("parent_id");
+DROP INDEX IF EXISTS "posts_comment_post_id_e81436d7";
+CREATE INDEX "posts_comment_post_id_e81436d7" ON "posts_comment" ("post_id");
+DROP INDEX IF EXISTS "posts_comment_user_id_ad949c47";
+CREATE INDEX "posts_comment_user_id_ad949c47" ON "posts_comment" ("user_id");
+DROP INDEX IF EXISTS "posts_post_author_permlink_00dde032_uniq";
+CREATE UNIQUE INDEX "posts_post_author_permlink_00dde032_uniq" ON "posts_post" ("author", "permlink");
+DROP INDEX IF EXISTS "posts_post_user_id_a4f40dc7";
+CREATE INDEX "posts_post_user_id_a4f40dc7" ON "posts_post" ("user_id");
+DROP INDEX IF EXISTS "posts_vote_content_33a66f_idx";
+CREATE INDEX "posts_vote_content_33a66f_idx" ON "posts_vote" ("content_type_id", "object_id");
+DROP INDEX IF EXISTS "posts_vote_content_type_id_1f02ed34";
+CREATE INDEX "posts_vote_content_type_id_1f02ed34" ON "posts_vote" ("content_type_id");
+DROP INDEX IF EXISTS "posts_vote_user_id_8509048a";
+CREATE INDEX "posts_vote_user_id_8509048a" ON "posts_vote" ("user_id");
+DROP INDEX IF EXISTS "posts_vote_user_id_content_type_id_object_id_df7f02c7_uniq";
+CREATE UNIQUE INDEX "posts_vote_user_id_content_type_id_object_id_df7f02c7_uniq" ON "posts_vote" ("user_id", "content_type_id", "object_id");
 COMMIT;
