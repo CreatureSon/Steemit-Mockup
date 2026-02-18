@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_header %}
+<div class="container">
+        <h1>Oops, something went wrong.</h1>
+
+        {% if message %}
+        <p class="message">{{ message }}</p>
+        {% endif %}
+</div>
+{% endblock page_header %}
