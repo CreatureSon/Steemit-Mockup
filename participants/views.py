@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+from random import randint
 
 from django.conf import settings
 from django.shortcuts import render, redirect
@@ -19,14 +20,24 @@ def begin(request):
 
     pid = request.GET.get('pid', None)
 
+    assignment = request.GET.get('a', None)
+    assignment = int(assignment) if assignment else randint(1, 2)
+
+    if assignment == 1:
+        steem_power = 10.00
+        steem_dollars = 90.00
+    else:
+        steem_power = 90.00
+        steem_dollars = 10.00
+
     if pid:
         participant, created = Participant.objects.get_or_create(
             participant_code=pid,
             participant_image='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',
             is_staff=False,
             is_active=True,
-            steem_power=10.00,
-            steem_dollars=90.00
+            steem_power=steem_power,
+            steem_dollars=steem_dollars
         )
 
         # Log in the user manually (bypassing password)
