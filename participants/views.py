@@ -33,11 +33,13 @@ def begin(request):
     if pid:
         participant, created = Participant.objects.get_or_create(
             participant_code=pid,
-            participant_image='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',
-            is_staff=False,
-            is_active=True,
-            steem_power=steem_power,
-            steem_dollars=steem_dollars
+            defaults={
+                'participant_image': 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',
+                'is_staff': False,
+                'is_active': True,
+                'steem_power': steem_power,
+                'steem_dollars': steem_dollars,
+            }
         )
 
         if created:
