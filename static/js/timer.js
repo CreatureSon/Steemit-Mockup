@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!joinedAt) return;
 
     //const limitMs = 10 * 60 * 1000;
-    const limitMs = 1 * 60 * 1000;
+    const limitMs = 5 * 60 * 1000;
     const start = new Date(joinedAt);
     const remaining = limitMs - (Date.now() - start.getTime());
 
