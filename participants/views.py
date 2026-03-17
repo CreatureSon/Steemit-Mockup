@@ -1,8 +1,4 @@
-import os
-import pandas as pd
-from random import randint
-
-from django.conf import settings
+from urllib.parse import urlencode
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -11,6 +7,7 @@ from django.utils import timezone
 from .decorators import study_time_required
 
 from .models import Participant
+from posts.models import Vote
 from .forms import ParticipantLoginForm
 
 def begin(request):
@@ -102,32 +99,24 @@ def end(request):
     return_url = user.return_url
     post_count = user.posts.count()
     comment_count = user.comment_set.count()
-    vote_count = user.vote_set.count()
+    vote_count = Vote.objects.filter(user=user).count()
     steem_total = user.steem_power + user.steem
 
-    new_row = {
-        "ID": user_id,
-        "Posts": post_count,
-        "Comments": comment_count,
-        "Votes": vote_count,
-        "Steem": steem_total,
-        "Steem Power Ratio": 0.00
-    }
+    user.post_count_final = post_count
+    user.comment_count_final = comment_count
+    user.vote_count_final = vote_count
+    user.steem_total_final = steem_total
+    user.completed = True
+    user.save()
 
-    file_path = os.path.join(settings.BASE_DIR, "Participant_Data.xlsx")
-
-    if os.path.exists(file_path):
-        df = pd.read_excel(file_path)
-    else:
-        df = pd.DataFrame(columns=[
-            "ID","Posts","Comments","Votes","Steem","Steem Power Ratio"
-        ])
-
-    # Appends new participant data
-    df.loc[len(df)] = new_row
-
-    # Save excelsheet
-    df.to_excel(file_path, index=False)
+    if return_url:
+        params = urlencode({
+            'posts': post_count,
+            'comments': comment_count,
+            'votes': vote_count,
+            'steem': float(steem_total),
+        })
+        return_url = f"{return_url}&{params}"
 
     # Logout User
     logout(request)

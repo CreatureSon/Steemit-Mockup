@@ -26,6 +26,13 @@ class Participant(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'participant_code'
     REQUIRED_FIELDS = [] # For createsuperuser
 
+    # Exit Survey Data
+    post_count_final = models.IntegerField(default=0)
+    comment_count_final = models.IntegerField(default=0)
+    vote_count_final = models.IntegerField(default=0)
+    steem_total_final = models.DecimalField(max_digits=20, decimal_places=3, default=0)
+    completed = models.BooleanField(default=False)
+
     objects = ParticipantManager()
 
     def __str__(self):
