@@ -18,17 +18,16 @@ def begin(request):
     if request.user.is_authenticated:
         return redirect('posts:posts')
 
-    pid = request.GET.get('pid', None)
+    pid = request.GET.get('pid', '')
+    vestingness = request.GET.get('vestingness', '')
+    return_url = request.GET.get('return_url', '')
 
-    assignment = request.GET.get('a', None)
-    assignment = int(assignment) if assignment else randint(1, 2)
-
-    if assignment == 1:
-        steem_power = 10.00
-        steem_dollars = 90.00
-    else:
+    if vestingness == 2:
+        steem = 10.00
         steem_power = 90.00
-        steem_dollars = 10.00
+    else:
+        steem = 90.00
+        steem_power = 10.00
 
     if pid:
         participant, created = Participant.objects.get_or_create(
@@ -38,7 +37,8 @@ def begin(request):
                 'is_staff': False,
                 'is_active': True,
                 'steem_power': steem_power,
-                'steem_dollars': steem_dollars,
+                'steem': steem,
+                'return_url': return_url,
             }
         )
 
@@ -99,10 +99,11 @@ def end(request):
 
     user = request.user
     user_id = user.participant_code
+    return_url = user.return_url
     post_count = user.posts.count()
     comment_count = user.comment_set.count()
     vote_count = user.vote_set.count()
-    steem_total = user.steem_power + user.steem_dollars
+    steem_total = user.steem_power + user.steem
 
     new_row = {
         "ID": user_id,
@@ -131,7 +132,7 @@ def end(request):
     # Logout User
     logout(request)
 
-    return render(request, 'participants/end.html')
+    return render(request, 'participants/end.html', {'return_url': return_url})
 
 @login_required
 def wallet(request):

@@ -56,14 +56,14 @@ class ParticipantAdmin(UserAdmin):
     add_form = ParticipantAdminAddForm
 
     # Fields to show in the admin list
-    list_display = ('participant_code', 'participant_image', 'steem_dollars', 'steem_power', 'is_staff', 'is_active')
+    list_display = ('participant_code', 'participant_image', 'steem', 'steem_power', 'is_staff', 'is_active')
     list_filter = ('is_staff', 'is_active')
     search_fields = ['participant_code']
     ordering = ['participant_code']
 
     fieldsets = (
         (None, {'fields': ('participant_code', 'password', 'participant_image')}),
-        ('Balances', {'fields': ('steem_dollars', 'steem_power')}),
+        ('Balances', {'fields': ('steem', 'steem_power')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'groups', 'user_permissions')}),
     )
     add_fieldsets = (
