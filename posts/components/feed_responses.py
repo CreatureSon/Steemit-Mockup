@@ -133,8 +133,7 @@ class FeedResponsesView(UnicornView):
             category_name=self.post.category_name,
             votes=self.post.votes,
             payout=self.post.payout,
-            comments=self.post.comments,
-            resteem_by=user,
+            resteemed_by=user,
             original_post=self.post
         )
 
