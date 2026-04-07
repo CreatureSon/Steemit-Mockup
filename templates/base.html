@@ -13,6 +13,8 @@
 
     {% bootstrap_css %}
     {% bootstrap_javascript jquery='full' %}
+    {% load unicorn %}
+    {% unicorn_scripts %}
     {% block styles %}
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/participants.css' %}">
