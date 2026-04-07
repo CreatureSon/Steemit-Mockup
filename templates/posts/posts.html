@@ -1,8 +1,10 @@
 {% extends "base.html" %}
 {% load static %}
 {% load custom_times %}
+{% load unicorn %}
 
 {% block content %}
+{% unicorn_scripts %}
 {% csrf_token %}
 
 <div style="position:relative; padding:4px; border:1px solid #ddd; border-radius:8px; height:600px;">
