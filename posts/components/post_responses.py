@@ -4,7 +4,7 @@ from posts.models import Post, Vote
 
 class PostResponsesView(UnicornView):
     post: Post
-    payout: str
+    payout: str = ""
     downvoted: bool = False
     upvoted: bool = False
     voted: bool = False
