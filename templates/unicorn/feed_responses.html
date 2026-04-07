@@ -18,8 +18,10 @@
             <span style="color:#1FBF82">{{total_votes}} votes</span>
 
             <span style="width:1px; height:16px; background-color:#ccc;"></span>
-            <img src="{% static 'post/Comments.png' %}" style="width:16px; height:16px; mix-blend-mode:multiply;"/>
-            <span style="color:#1FBF82; display:flex; align-items:center; gap:8px; margin-right:4px;">{{total_comments}}</span>
+            <a href="{% url 'posts:post' post.id %}#comments" style="display:flex; align-items:center; gap:4px; text-decoration:none;">
+                <img src="{% static 'post/Comments.png' %}" style="width:16px; height:16px; mix-blend-mode:multiply;"/>
+                <span style="color:#1FBF82; display:flex; align-items:center; gap:8px; margin-right:4px;">{{total_comments}}</span>
+            </a>
 
             <span style="width:1px; height:16px; background-color:#ccc;"></span>
             <img src="{% if resteemed %} {% static 'post/ReSteemClicked.png' %} {% else %} {% static 'post/ReSteem.png' %} {% endif %}"

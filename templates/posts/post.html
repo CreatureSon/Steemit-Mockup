@@ -47,7 +47,7 @@
     </div>
 </div>
 
-<div style="display:flex; flex-direction:column; gap:5px; padding-top:8px;">
+<div id="comments" style="display:flex; flex-direction:column; gap:5px; padding-top:8px;">
     {% for comment in comments %}
         {% include 'posts/comments.html' with comment=comment depth=0 %}
     {% endfor %}
