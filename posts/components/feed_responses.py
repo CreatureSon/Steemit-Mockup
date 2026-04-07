@@ -10,6 +10,7 @@ class FeedResponsesView(UnicornView):
     voted: bool = False
     resteemed: bool = False
     show_resteem_box: bool = False
+    show_own_post_error: bool = False
     show_comment_box: bool = False
     total_votes: int = 0
     total_comments: int = 0
