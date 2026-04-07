@@ -20,9 +20,11 @@ def begin(request):
     return_url = request.GET.get('return_url', '')
 
     if vestingness == '2':
+        user_vested_level = 2
         steem = 10.00
         steem_power = 90.00
     else:
+        user_vested_level = 1
         steem = 90.00
         steem_power = 10.00
 
@@ -35,6 +37,7 @@ def begin(request):
             participant_image='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',
             is_staff=False,
             is_active=True,
+            user_vested_level=user_vested_level,
             steem_power=steem_power,
             steem=steem,
             return_url=return_url,
@@ -109,12 +112,17 @@ def end(request):
 
     if return_url:
         params = urlencode({
+            'PROLIFIC_PID': user_id,
+            'Vestingness' : 2,
             'posts': post_count,
             'comments': comment_count,
             'votes': vote_count,
             'steem': float(steem_total),
         })
-        return_url = f"{return_url}&{params}"
+
+        base_url = "https://baylor.qualtrics.com/jfe/form/"
+        base_url = f"{base_url}{return_url}"
+        return_url = f"{base_url}?{params}"
 
     # Logout User
     logout(request)

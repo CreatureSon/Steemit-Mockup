@@ -12,6 +12,7 @@ class Participant(AbstractBaseUser, PermissionsMixin):
     participant_image = models.URLField(blank=True, null=True)
     
     # Participant Steemit Balances
+    user_vested_level = models.IntegerField(default=1) # 1 or 2
     steem = models.DecimalField(max_digits=20, decimal_places=3, default=0)
     steem_power = models.DecimalField(max_digits=20, decimal_places=3, default=0)
 
