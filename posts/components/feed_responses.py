@@ -3,7 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 from posts.models import Post, Vote, Comment
 
 class FeedResponsesView(UnicornView):
-    post: Post
+    post: Post = None
+    post_id: int = 0
     payout: str = ""
     downvoted: bool = False
     upvoted: bool = False
@@ -18,8 +19,8 @@ class FeedResponsesView(UnicornView):
 
     def mount(self):
         #arg = self.component_args[0]
-        post_id = self.component_kwargs["post_id"]
-        self.post = Post.objects.get(id=post_id)
+        self.post_id = self.component_kwargs["post_id"]
+        self.post = Post.objects.get(id=self.post_id)
 
         user = self.request.user
         if user is not None and user.is_authenticated:
