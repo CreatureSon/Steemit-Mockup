@@ -14,6 +14,20 @@ class Post(models.Model):
         blank=True
     )
 
+    resteemed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='resteems'
+    )
+
+    original_post = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='resteem_copies'
+    )
+
     # Post Association Fields
     author = models.CharField(max_length=75)
     permlink = models.CharField(max_length=255, blank=True, null=True)
@@ -39,16 +53,6 @@ class Post(models.Model):
 
     class Meta:
         unique_together = ('author', 'permlink')
-
-    #//TODO
-    # Future method for tokens possibly
-    # from django.db.models import F
-
-    # tokens = models.GeneratedField(
-    #    expression=F('votes') * 0.4,
-    #    output_field=models.FloatField(),
-    #    db_persist=True,
-    # )
 
     def __str__(self):
         return self.title

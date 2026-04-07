@@ -37,10 +37,10 @@
               {{post.body_preview}}
             </div>
             {% endif %}
-          </a>
-          <span style="width:100%; height:1px; background-color:#ccc;"></span>
-          {% unicorn 'feed_responses' post_id=post.id %}
-        </div>
+          </div>
+        </a>
+        <span style="width:100%; height:1px; background-color:#ccc;"></span>
+        {% unicorn 'feed_responses' post_id=post.id %}
       </div>
     </div>
     {% empty %}

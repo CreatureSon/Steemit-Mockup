@@ -7,7 +7,7 @@ from django.utils import timezone
 from .decorators import study_time_required
 
 from .models import Participant
-from posts.models import Vote
+from posts.models import Vote, Post
 from .forms import ParticipantLoginForm
 
 def begin(request):
@@ -122,5 +122,22 @@ def end(request):
     return render(request, 'participants/end.html', {'return_url': return_url})
 
 @login_required
+@study_time_required
 def wallet(request):
     return render(request, 'participants/wallet.html')
+
+@login_required
+@study_time_required
+def blog(request):
+    participant = request.user
+
+    authored = Post.objects.filter(user=participant, resteemed_by=None)
+    resteemed = Post.objects.filter(resteemed_by=participant)
+    posts = (authored | resteemed).order_by('-date')
+
+    context = {
+        'posts' : posts,
+        'participants' : participant,
+    }
+
+    return render(request, 'participants/blog.html', context)

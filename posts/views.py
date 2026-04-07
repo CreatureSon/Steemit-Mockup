@@ -16,9 +16,12 @@ def posts(request):
     participant = request.user
 
     if participant.is_staff:
-        posts = Post.objects.all()
+        posts = Post.objects.all(resteemed_by=None)
     else:
-        posts = Post.objects.filter(user=None) | Post.objects.filter(user=participant)
+        posts = (
+            Post.objects.filter(user=None, resteemed_by=None) | 
+            Post.objects.filter(user=participant, resteemed_by=None )
+        )
 
     context = {
         'posts': posts,

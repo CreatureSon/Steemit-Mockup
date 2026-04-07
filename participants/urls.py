@@ -9,4 +9,5 @@ urlpatterns = [
     path('login/', views.participant_login, name='login'),
     path('end/', views.end, name='end'),
     path('wallet/', views.wallet, name='wallet'),
+    path('blog/', views.blog, name='blog'),
     ]

@@ -12,6 +12,7 @@ class PostResponsesView(UnicornView):
     show_resteem_box: bool = False
     show_comment_box: bool = False
     total_votes: int = 0
+    is_own_post: bool = False
 
     def mount(self):
         #arg = self.component_args[0]
@@ -32,6 +33,12 @@ class PostResponsesView(UnicornView):
             if voted:
                 self.upvoted = voted.value == Vote.UPVOTE
                 self.downvoted = voted.value == Vote.DOWNVOTE
+
+            self.is_own_post = (self.post.user == user)
+            self.resteemed = Post.objects.filter(
+                resteemed_by=user, 
+                original_post=self.post
+            ).exists()
 
         self.name = self.post.author
         self.payout = self.post.payout
@@ -89,10 +96,41 @@ class PostResponsesView(UnicornView):
         return self.post.votes + user_voted
 
     def toggle_resteem(self):
-        if not self.resteemed:
+        if self.resteemed:
+            return
+        if self.is_own_post:
+            self.show_own_post_error = True
+            self.show_resteem_box = False
+        else:
+            self.show_own_post_error = False
             self.show_resteem_box = not self.show_resteem_box
 
+    def clone_resteem_error(self):
+        self.show_own_post_error = False
+
     def resteemed_post(self):
+        user = self.request.user
+        if not user.is_authenticated or self.is_own_post or self.resteemed:
+            return
+        
+        Post.objects.create(
+            user=user,
+            author=self.post.author,
+            permlink=None,
+            author_image=self.post.author_image,
+            title=self.post.title,
+            body=self.post.body,
+            body_preview=self.post.body_preview,
+            image_url=self.post.image_url,
+            category=self.post.category,
+            category_name=self.post.category_name,
+            votes=self.post.votes,
+            payout=self.post.payout,
+            comments=self.post.comments,
+            resteem_by=user,
+            original_post=self.post
+        )
+
         self.show_resteem_box = False
         self.resteemed = True
 
