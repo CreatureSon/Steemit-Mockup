@@ -16,7 +16,7 @@ def posts(request):
     participant = request.user
 
     if participant.is_staff:
-        posts = Post.objects.all(resteemed_by=None)
+        posts = Post.objects.filter(resteemed_by=None)
     else:
         posts = (
             Post.objects.filter(user=None, resteemed_by=None) | 
