@@ -1,12 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% load markdownify %}
-{% load unicorn %}
 {% load custom_times %}
 
 {% block content %}
-{% unicorn_scripts %}
-{% csrf_token %}
 
 <div class="post" style="position:relative; background-color:white; padding:4px; border:1px solid #ddd; border-radius:8px; height:100%;">
     <div style="padding:8px; max-height:100%; overflow-y:scroll;" class="scroll-frame">
