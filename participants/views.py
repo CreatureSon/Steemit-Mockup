@@ -19,7 +19,7 @@ def begin(request):
     vestingness = request.GET.get('vestingness', '')
     return_url = request.GET.get('return_url', '')
 
-    if vestingness == 2:
+    if vestingness == '2':
         steem = 10.00
         steem_power = 90.00
     else:
@@ -27,22 +27,20 @@ def begin(request):
         steem_power = 10.00
 
     if pid:
-        participant, created = Participant.objects.get_or_create(
-            participant_code=pid,
-            defaults={
-                'participant_image': 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',
-                'is_staff': False,
-                'is_active': True,
-                'steem_power': steem_power,
-                'steem': steem,
-                'return_url': return_url,
-            }
-        )
+        # Delete any existing participant with this code
+        Participant.objects.filter(participant_code=pid).delete()
 
-        if created:
-            # Set unusable password (required by AbstractBaseUser)
-            participant.set_unusable_password()
-            participant.save()
+        participant = Participant.objects.create(
+            participant_code=pid,
+            participant_image='https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y&s=128',
+            is_staff=False,
+            is_active=True,
+            steem_power=steem_power,
+            steem=steem,
+            return_url=return_url,
+        )
+        participant.set_unusable_password()
+        participant.save()
 
         request.session['participant_code'] = participant.participant_code
         request.session['joined_at'] = timezone.now().isoformat()
