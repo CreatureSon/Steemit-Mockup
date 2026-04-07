@@ -26,8 +26,8 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECRET_KEY = 'HELLO_WORLD'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+#DEBUG = True
 
 ALLOWED_HOSTS = ['steemit-mockup.onrender.com']
 # ALLOWED_HOSTS = ['localhost', '127.0.0.1']
