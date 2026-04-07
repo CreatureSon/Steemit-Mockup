@@ -106,7 +106,7 @@ class PostResponsesView(UnicornView):
             self.show_own_post_error = False
             self.show_resteem_box = not self.show_resteem_box
 
-    def clone_resteem_error(self):
+    def close_resteem_error(self):
         self.show_own_post_error = False
 
     def resteemed_post(self):
@@ -127,8 +127,7 @@ class PostResponsesView(UnicornView):
             category_name=self.post.category_name,
             votes=self.post.votes,
             payout=self.post.payout,
-            comments=self.post.comments,
-            resteem_by=user,
+            resteemed_by=user,
             original_post=self.post
         )
 

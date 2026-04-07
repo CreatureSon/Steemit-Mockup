@@ -112,7 +112,7 @@ class FeedResponsesView(UnicornView):
             self.show_own_post_error = False
             self.show_resteem_box = not self.show_resteem_box
 
-    def clone_resteem_error(self):
+    def close_resteem_error(self):
         self.show_own_post_error = False
 
     def resteemed_post(self):
