@@ -41,10 +41,11 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav ml-auto align-items-center">
                 {% if request.session.joined_at %}
+                {% load participants_tags %}
                 <li class="nav-item mr-3">
                     <div id="session-timer" title="Time remaining in session">
                         <span class="timer-icon">⏱</span>
-                        <span id="timer-display">10:00</span>
+                        <span id="timer-display">{{ request.session.joined_at|time_remaining }}</span>
                     </div>
                 </li>
                 {% endif %}
