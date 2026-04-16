@@ -3,14 +3,17 @@
 {% load custom_times %}
 {% load unicorn %}
 
+{% block page_header %}
+    {% with profile_user=participant active_tab="blog" %}
+        {% include "participants/_profile_subnav.html" %}
+    {% endwith %}
+{% endblock page_header %}
+
 {% block content %}
 {% unicorn_scripts %}
 {% csrf_token %}
 
-<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
-    <h2 style="margin:0; font-size:18px; color:#333;">
-        @{{ participant.participant_code }}'s Blog
-    </h2>
+<div style="display:flex; align-items:center; justify-content:flex-end; margin-bottom:10px;">
     <a href="{% url 'posts:new_post' %}"
         style="font-size:13px; color:#1FBF82; border:1px solid #1FBF82; border-radius:8px; padding:4px 12px; text-decoration:none;">
         + New Post

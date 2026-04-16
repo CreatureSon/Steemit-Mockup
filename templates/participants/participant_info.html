@@ -1,0 +1,20 @@
+<!-- participants/_profile_subnav.html -->
+<div class="wallet-user-box">
+    <div class="wallet-user-inner">
+        <h1 class="wallet-username">{{ profile_user.participant_code }}</h1>
+        <p class="wallet-join-date">Joined {{ profile_user.date_joined|date:"F Y" }}</p>
+    </div>
+
+    <div class="wallet-subnav">
+        <div class="wallet-subnav-inner">
+            <div class="wallet-subnav-left">
+                <a href="{% url 'participants:blog' %}"
+                   class="wallet-tab {% if active_tab == 'blog' %}active{% endif %}">Blog</a>
+            </div>
+            <div class="wallet-subnav-right">
+                <a href="{% url 'participants:wallet' %}"
+                   class="wallet-tab {% if active_tab == 'wallet' %}active{% endif %}">Wallet</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -20,7 +20,6 @@
     <link rel="stylesheet" href="{% static 'css/participants.css' %}">
     <link rel="stylesheet" href="{% static 'css/posts.css' %}">
     {% endblock styles %}
-
 </head>
 
 <body class="bg-light"
@@ -40,7 +39,15 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ml-auto align-items-center">
+                {% if request.session.joined_at %}
+                <li class="nav-item mr-3">
+                    <div id="session-timer" title="Time remaining in session">
+                        <span class="timer-icon">⏱</span>
+                        <span id="timer-display">10:00</span>
+                    </div>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'posts:new_post' %}">
                         <img class="img-fluid" src="{% static 'home/create-post.png' %}" width="45" height="45">

@@ -2,28 +2,9 @@
 {% load static %}
 
 {% block page_header %}
-<!-- Top user info box -->
-<div class="wallet-user-box">
-    <div class="wallet-user-inner">
-        <h1 class="wallet-username">{{ user.participant_code }}</h1>
-        <p class="wallet-join-date">Joined {{ user.date_joined|date:"F Y" }}</p>
-    </div>
-
-    <!-- Sub-navigation bar -->
-    <div class="wallet-subnav">
-        <div class="wallet-subnav-inner">
-            <div class="wallet-subnav-left">
-                <a href="{% url 'participants:blog' %}" class="wallet-tab">Blog</a>
-                <a href="#" class="wallet-tab">Rewards ▾</a>
-            </div>
-
-            <div class="wallet-subnav-right">
-                <span class="wallet-tab active">Wallet</span>
-            </div>
-        </div>
-    </div>
-
-</div>
+    {% with profile_user=user active_tab="wallet" %}
+        {% include "participants/_profile_subnav.html" %}
+    {% endwith %}
 {% endblock page_header %}
 
 {% block content %}
@@ -58,7 +39,7 @@
             </div>
             <div class="wallet-col wallet-balance-col">
                 <div class="wallet-balance-box">
-                    <div class="wallet-balance">{{ user.steem_power }} STEEM</div>
+                    <div class="wallet-balance">{{ user.steem_power }} SP</div>
                 </div>
             </div>
         </div>
