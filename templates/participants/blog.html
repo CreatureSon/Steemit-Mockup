@@ -4,8 +4,8 @@
 {% load unicorn %}
 
 {% block page_header %}
-    {% with profile_user=participant active_tab="blog" %}
-        {% include "participants/_profile_subnav.html" %}
+    {% with user=user active_tab="blog" %}
+        {% include "participants/participant_info.html" %}
     {% endwith %}
 {% endblock page_header %}
 

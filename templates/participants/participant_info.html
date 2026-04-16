@@ -1,8 +1,7 @@
-<!-- participants/_profile_subnav.html -->
 <div class="wallet-user-box">
     <div class="wallet-user-inner">
-        <h1 class="wallet-username">{{ profile_user.participant_code }}</h1>
-        <p class="wallet-join-date">Joined {{ profile_user.date_joined|date:"F Y" }}</p>
+        <h1 class="wallet-username">{{ user.participant_code }}</h1>
+        <p class="wallet-join-date">Joined {{ user.date_joined|date:"F Y" }}</p>
     </div>
 
     <div class="wallet-subnav">

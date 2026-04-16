@@ -2,8 +2,8 @@
 {% load static %}
 
 {% block page_header %}
-    {% with profile_user=user active_tab="wallet" %}
-        {% include "participants/_profile_subnav.html" %}
+    {% with participant=user active_tab="wallet" %}
+        {% include "participants/participant_info.html" %}
     {% endwith %}
 {% endblock page_header %}
 
